@@ -1,59 +1,103 @@
-# Quimia Arcade
+# jogo_quimia
 
-Minijogos para o stand do projeto Quimia. Vite + Phaser 3, 100% offline.
+**Quimia Arcade:** minijogos para o stand do projeto Quimia, com ranking ao vivo, brindes e aprendizado sobre segurança química doméstica. Roda 100% offline, no navegador, com teclado ou controle de PS5.
 
-## Rodar SEM Node (só Python)
+## Sobre
+
+A Quimia é uma plataforma de segurança química doméstica: transforma as Fichas de Dados de Segurança (FDS) de saneantes em orientações simples, como alertas de misturas perigosas. O Arcade leva essa ideia para a feira: a pessoa joga em menos de 10 segundos, disputa o ranking e sai sabendo que certas misturas não se fazem.
+
+## Jogos
+
+| Jogo | Como funciona |
+|---|---|
+| **Kemi Bolha** | Suba com a Kemi e passe pelos vãos entre os frascos. 3 vidas, bolhinhas bônus. |
+| **Pode Misturar?** | Dois produtos aparecem: seguro ou perigoso? Combo, tempo cada vez menor e, no fim, os pares que você errou com o porquê. |
+| **Kemi Sobe** | Quique de prateleira em prateleira. Prateleiras que andam e quebram, vapores, tampinha-foguete e escudo-FDS. |
+| **Kemi Runner** | Em desenvolvimento (só entra se sobrar tempo). |
+
+Cada partida termina por 3 vidas ou 120 s. A dificuldade sobe por pontos, não por tempo, e os primeiros segundos são fáceis de propósito.
+
+## Recursos
+
+- Ranking geral (Pontuação Quimia normalizada entre jogos) e por jogo, com desempate por menor tempo.
+- Tela `ranking.html` para TV ou segundo monitor, atualizada ao vivo.
+- Modo atração, apelido em tela estilo arcade, tutorial de 3 s e navegação 100% sem mouse.
+- Código de resgate de 4 caracteres, brindes em 3 níveis e contagem regressiva do campeão.
+- Captura de contato opcional, com aceite LGPD, e QR codes gerados localmente.
+- Painel admin oculto: conferir código, marcar entrega, exportar CSV/JSON, importar, resetar o dia e ajustar metas e brindes.
+- Acessibilidade: textos grandes, contraste AA e opção de reduzir efeitos de piscar.
+
+## Como rodar
+
+### Sem Node (só Python)
 
 ```bash
 python servir.py
 ```
 
-Abra http://127.0.0.1:8000/ (jogo) e http://127.0.0.1:8000/ranking (TV). Ou dê dois cliques em `iniciar_sem_node.bat`.
-O jogo roda direto da raiz (`index.html` + Phaser local em `vendor/`), sem build. Os testes (Vitest) precisam do Node.
+Abra http://127.0.0.1:8000/ (jogo) e http://127.0.0.1:8000/ranking (TV). No Windows, também dá para dar dois cliques em `iniciar_sem_node.bat`.
 
-## Hospedagem (GitHub Pages etc.)
-
-É só publicar a raiz do repositório: `index.html` (jogo) e `ranking.html` (TV). Todos os caminhos são relativos. Não há build.
-
-## Desenvolvimento (com Node)
+### Com Node (desenvolvimento)
 
 ```bash
 npm install
-npm run dev      # jogo em http://127.0.0.1:5173/  |  TV do ranking em /ranking (ou ranking.html na hospedagem)
+npm run dev      # jogo em http://127.0.0.1:5173/
 npm test         # testes unitários (ranking e dificuldade)
-npm run build    # gera a pasta dist/
 ```
+
+### Hospedagem
+
+Não há build: publique a raiz do repositório (por exemplo no GitHub Pages). O jogo é `index.html` e a TV do ranking é `ranking.html`. Todos os caminhos são relativos.
 
 ## Controles
 
 | Ação | Teclado | Controle |
 |---|---|---|
-| Mover | ← → ↑ ↓ / A D W S | D-pad ou analógico |
-| Ação | Espaço ou Enter | ✕ (PS) / A (Xbox) |
+| Mover | ← → ↑ ↓ ou A D W S | D-pad ou analógico |
+| Ação | Espaço ou Enter | ✕ (PlayStation) / A (Xbox) |
 | Voltar | Esc ou Backspace | ○ / B |
 | Pausar | P | Options / Start |
 | Mudo | M | — |
 
-## Onde ajustar as coisas
+## Estrutura
+
+```
+index.html, ranking.html   páginas do jogo e da TV
+src/scenes/                telas e jogos (Phaser)
+src/core/                  input, ranking, armazenamento, som, QR
+src/config/                dificuldade, brindes, evento, misturas, fatos
+src/admin/                 painel admin
+assets/                    manifest.json e imagens da Kemi
+vendor/, fonts/            Phaser, gerador de QR e fontes locais
+scripts/                   importador de misturas
+tests/                     testes (Vitest)
+```
+
+## Configuração
 
 - `src/config/difficulty.js`: níveis, pontos por nível e "par" de cada jogo.
-- `src/config/prizes.js`, `src/config/event.js`: brindes, PIN, hora de encerramento, Instagram, QR (todos provisórios).
+- `src/config/prizes.js` e `src/config/event.js`: brindes, PIN do admin, hora do campeão, Instagram, hashtag e links dos QR. Os valores atuais são provisórios; tudo também pode ser alterado no painel admin (`Ctrl+Shift+A`).
 - `src/config/fatos.js`: frases do "Você sabia?".
-- `assets/manifest.json` e `assets/kemi/`: imagens da Kemi (faltou arquivo = Kemi desenhada em código).
+- `assets/manifest.json` e `assets/kemi/`: imagens da Kemi. Arquivo ausente = a Kemi é desenhada em código.
 
-> Marcos entregues até aqui: 1 (fundação), 2 (Kemi Bolha), 3 (Pode Misturar?), 4 (Kemi Sobe) e 5 (fechamento do evento). O Kemi Runner ainda usa o jogo "em construção".
+### Conteúdo do Pode Misturar?
 
-## Conteúdo do Pode Misturar?
+Os pares de `src/config/misturas.js` são **exemplos a validar**: confira cada um com as FDS antes de usar em público. Para trocar pelas regras do simulador do app:
 
-Os pares estão em `src/config/misturas.js` (EXEMPLOS `[VALIDAR]` — conferir cada um com as FDS).
-Para trocar pelas regras do simulador do app: `python scripts/importar_misturas.py dados/misturas.csv`
-(colunas: `produto_a, produto_b, perigosa, porque, fonte`; a ordem das linhas é a ordem de entrada no jogo).
+```bash
+python scripts/importar_misturas.py dados/misturas.csv
+```
 
+Colunas: `produto_a, produto_b, perigosa, porque, fonte`. A ordem das linhas é a ordem de entrada no jogo.
 
-## Fechamento do evento (Marco 5)
+## Dados e privacidade
 
-- **Fluxo ao sair da tela final:** contato (só Top 3 do jogo ou meta do brinde, com aceite LGPD e a opção "Sou de uma empresa") → convite de 4 s com 2 QR codes → destino.
-- **QR codes** são gerados localmente (`vendor/qrcode.js`, MIT). Os links ficam em `src/config/event.js` e no painel admin.
-- **Painel admin:** `Ctrl+Shift+A` + PIN (provisório: `2468` — troque no próprio painel). Busca por código de resgate, marcar entrega, apagar partida, exportar CSV/JSON, importar JSON (mescla estações), resetar o ranking do dia (baixa um backup antes) e ajustar metas, brindes, evento e jogos do hub.
-- **Prêmio Master:** líder do Ranking Geral; o admin mostra o líder atual e a contagem regressiva "Campeão em HH:MM:SS" aparece na atração e em `ranking.html`.
-- Os dados ficam no `localStorage` de cada navegador/computador: em mais de uma estação, exporte o JSON de cada uma e importe na principal no fim.
+Tudo fica no `localStorage` do navegador; não há servidor. O apelido aparece no ranking, mas o contato nunca. O contato só é pedido a quem entra no Top 3 ou atinge a meta, com aceite explícito. Com mais de uma estação de jogo, exporte o JSON de cada uma e importe na principal no fim do evento.
+
+## Status
+
+Em desenvolvimento para a feira. Falta a parte de operação (guia do stand, checklist e scripts de início) e o polimento. O Kemi Runner é opcional.
+
+## Licença
+
+MIT. Veja o arquivo [LICENSE](LICENSE).
