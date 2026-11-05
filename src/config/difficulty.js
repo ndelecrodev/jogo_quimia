@@ -29,6 +29,19 @@ export const BUBBLE_LEVELS = [
   { gap: 165, speed: 630, maxDelta: 225, spacing: 650 },
 ];
 
+// Pode Misturar? — tempo para decidir (3,0 s → 1,0 s) e quantos pares da lista já entraram, por nível.
+export const MIX_LEVELS = [
+  { timeMs: 3000, unlocked: 6 },
+  { timeMs: 2700, unlocked: 8 },
+  { timeMs: 2400, unlocked: 10 },
+  { timeMs: 2100, unlocked: 12 },
+  { timeMs: 1850, unlocked: 14 },
+  { timeMs: 1600, unlocked: 14 },
+  { timeMs: 1400, unlocked: 14 },
+  { timeMs: 1200, unlocked: 14 },
+  { timeMs: 1000, unlocked: 14 },
+];
+
 export function levelFor(points, perLevel, maxLevel) {
   return Math.min(Math.max(0, Math.floor(points / perLevel)), maxLevel);
 }
@@ -38,6 +51,13 @@ export function pressureBonus(elapsedMs, capMs = MAX_TIME_MS) {
   const start = capMs * 0.75;
   if (elapsedMs <= start) return 0;
   return 1 + Math.floor((elapsedMs - start) / 10000);
+}
+
+export function mixParams(points, elapsedMs, capMs = MAX_TIME_MS) {
+  const last = MIX_LEVELS.length - 1;
+  const level = levelFor(points, PONTOS_POR_NIVEL.misturar, last);
+  const eff = Math.min(last, level + pressureBonus(elapsedMs, capMs));
+  return { level, ...MIX_LEVELS[eff] };
 }
 
 export function bubbleParams(points, elapsedMs, capMs = MAX_TIME_MS) {

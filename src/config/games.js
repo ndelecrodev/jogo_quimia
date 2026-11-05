@@ -13,12 +13,12 @@ export const GAMES = [
   {
     id: 'misturar',
     name: 'Pode Misturar?',
-    scene: 'DummyGame',
-    ready: false,
+    scene: 'MixGame',
+    ready: true,
     enabledByDefault: true,
     desc: 'Seguro ou perigoso? Decida rápido.',
     tip: 'Escolha um lado',
-    keys: '←   →',
+    keys: '←  SEGURO     PERIGOSO  →',
   },
   {
     id: 'sobe',

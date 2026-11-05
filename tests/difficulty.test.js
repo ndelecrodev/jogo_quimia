@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BUBBLE_LEVELS, levelFor, pressureBonus, bubbleParams } from '../src/config/difficulty.js';
+import { BUBBLE_LEVELS, MIX_LEVELS, levelFor, pressureBonus, bubbleParams, mixParams } from '../src/config/difficulty.js';
 import { MAX_TIME_MS } from '../src/config/game.js';
 
 describe('nível por pontos', () => {
@@ -25,6 +25,19 @@ describe('Kemi Bolha: tabela de níveis', () => {
       const subidaPossivel = 440 * tempoEntreFrascos * 0.6; // 60% de folga para humano
       expect(l.maxDelta).toBeLessThanOrEqual(subidaPossivel);
     }
+  });
+});
+
+describe('Pode Misturar?: tempo para decidir', () => {
+  it('vai de 3,0 s a 1,0 s e libera mais pares por nível, sem passar do total', () => {
+    expect(MIX_LEVELS[0].timeMs).toBe(3000);
+    expect(MIX_LEVELS[MIX_LEVELS.length - 1].timeMs).toBe(1000);
+    for (let i = 1; i < MIX_LEVELS.length; i++) {
+      expect(MIX_LEVELS[i].timeMs).toBeLessThan(MIX_LEVELS[i - 1].timeMs);
+      expect(MIX_LEVELS[i].unlocked).toBeGreaterThanOrEqual(MIX_LEVELS[i - 1].unlocked);
+    }
+    expect(mixParams(0, 0)).toMatchObject(MIX_LEVELS[0]);
+    expect(mixParams(9999, 0).timeMs).toBe(1000);
   });
 });
 

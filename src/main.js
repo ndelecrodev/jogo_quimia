@@ -12,6 +12,7 @@ import Nickname from './scenes/Nickname.js';
 import Hub from './scenes/Hub.js';
 import Tutorial from './scenes/Tutorial.js';
 import BubbleGame from './scenes/BubbleGame.js';
+import MixGame from './scenes/MixGame.js';
 import DummyGame from './scenes/DummyGame.js';
 import GameOver from './scenes/GameOver.js';
 
@@ -24,7 +25,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   fps: { target: 60 },
   render: { antialias: true },
-  scene: [Boot, Attract, Nickname, Hub, Tutorial, BubbleGame, DummyGame, GameOver],
+  scene: [Boot, Attract, Nickname, Hub, Tutorial, BubbleGame, MixGame, DummyGame, GameOver],
 });
 
 sfx.setMuted(getSettings().muted);

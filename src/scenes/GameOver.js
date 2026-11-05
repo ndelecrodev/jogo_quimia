@@ -104,13 +104,26 @@ export default class GameOver extends BaseScene {
       T(this, 1400, 520, 'Chame um amigo para jogar!', 'body', { color: COLORS.mint2 });
     }
 
-    // "Você sabia?"
-    const fact = Phaser.Utils.Array.GetRandom(FATOS);
+    // Aprendizado (Pode Misturar?): até 3 pares errados, com a resposta certa e o porquê.
+    const wrong = (data.wrong || []).slice(0, 3);
     const fg = this.add.graphics();
-    drawCard(fg, 120, 730, 1680, 140, { fill: COLORS.elevated, stroke: COLORS.elevated2, sw: 2 });
-    T(this, 160, 770, 'VOCÊ SABIA?', 'overline', { color: COLORS.neon, origin: [0, 0.5] });
-    T(this, 160, 825, fact, 'bodyL', { origin: [0, 0.5], wordWrap: { width: 1600 } });
-    T(this, 960, 905, 'Quer saber mais? Pergunte pra Kemi no app Quimia (em breve).', 'caption', { color: COLORS.sky2 });
+    if (wrong.length) {
+      drawCard(fg, 120, 705, 1680, 205, { fill: COLORS.elevated, stroke: COLORS.elevated2, sw: 2 });
+      T(this, 160, 735, 'PARA LEMBRAR', 'overline', { color: COLORS.neon, origin: [0, 0.5] });
+      wrong.forEach((w, i) => {
+        const y = 782 + i * 42;
+        T(this, 160, y, `${w.a} + ${w.b}`, 'bodyS', { origin: [0, 0.5], color: COLORS.white });
+        T(this, 760, y, w.perigosa ? 'PERIGOSO' : 'SEGURO', 'bodyS', { origin: [0, 0.5], color: w.perigosa ? COLORS.danger : COLORS.neon, fontStyle: '800' });
+        T(this, 920, y, w.porque, 'bodyS', { origin: [0, 0.5], color: COLORS.mint2, wordWrap: { width: 860 } });
+      });
+    } else {
+      // "Você sabia?"
+      const fact = Phaser.Utils.Array.GetRandom(FATOS);
+      drawCard(fg, 120, 730, 1680, 140, { fill: COLORS.elevated, stroke: COLORS.elevated2, sw: 2 });
+      T(this, 160, 770, data.game === 'misturar' ? 'VOCÊ SABIA? (E ainda acertou tudo!)' : 'VOCÊ SABIA?', 'overline', { color: COLORS.neon, origin: [0, 0.5] });
+      T(this, 160, 825, fact, 'bodyL', { origin: [0, 0.5], wordWrap: { width: 1600 } });
+    }
+    T(this, 960, 925, 'Quer saber mais? Pergunte pra Kemi no app Quimia (em breve).', 'caption', { color: COLORS.sky2 });
 
     // Botões
     this.btns = [

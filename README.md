@@ -41,5 +41,11 @@ npm run build    # gera a pasta dist/
 - `src/config/fatos.js`: frases do "Você sabia?".
 - `assets/manifest.json` e `assets/kemi/`: imagens da Kemi (faltou arquivo = Kemi desenhada em código).
 
-> Marcos entregues até aqui: 1 (fundação) e 2 (Kemi Bolha). Pode Misturar? e Kemi Sobe ainda usam o jogo "em construção".
+> Marcos entregues até aqui: 1 (fundação), 2 (Kemi Bolha) e 3 (Pode Misturar?). Kemi Sobe ainda usa o jogo "em construção".
+
+## Conteúdo do Pode Misturar?
+
+Os pares estão em `src/config/misturas.js` (EXEMPLOS `[VALIDAR]` — conferir cada um com as FDS).
+Para trocar pelas regras do simulador do app: `python scripts/importar_misturas.py dados/misturas.csv`
+(colunas: `produto_a, produto_b, perigosa, porque, fonte`; a ordem das linhas é a ordem de entrada no jogo).
 
