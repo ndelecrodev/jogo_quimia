@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import { COLORS, hex, ts, RADIUS } from './theme.js';
 import { W, H } from './config/game.js';
 import { getSettings } from './core/Storage.js';
+import { qrMatrix } from './core/qr.js';
 
 export const reduceFx = () =>
   getSettings().reduceFlash || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -65,6 +66,23 @@ export class BubbleField {
       }
     }
   }
+}
+
+/** Desenha um QR code (módulos escuros em COLORS.bg sobre fundo branco) centrado em x,y com `size` px. */
+export function drawQR(scene, x, y, size, text) {
+  const { n, dark } = qrMatrix(text);
+  const quiet = 2; // borda branca (zona de silêncio), em módulos
+  const m = size / (n + quiet * 2);
+  const g = scene.add.graphics().setPosition(x - size / 2, y - size / 2);
+  g.fillStyle(0xffffff, 1);
+  g.fillRoundedRect(0, 0, size, size, 16);
+  g.fillStyle(hex(COLORS.bg), 1);
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      if (dark(r, c)) g.fillRect((c + quiet) * m, (r + quiet) * m, Math.ceil(m), Math.ceil(m));
+    }
+  }
+  return g;
 }
 
 export function kemiKey(scene) {

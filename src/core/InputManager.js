@@ -36,6 +36,8 @@ class InputManager {
     this.analogY = 0;
 
     window.addEventListener('keydown', (e) => {
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return; // digitando em campo (painel admin)
       if (PREVENT.has(e.code)) e.preventDefault();
       this.keys.add(e.code);
       this.tapped.add(e.code); // garante que toques rápidos (down+up entre dois frames) não se percam

@@ -41,7 +41,7 @@ npm run build    # gera a pasta dist/
 - `src/config/fatos.js`: frases do "Você sabia?".
 - `assets/manifest.json` e `assets/kemi/`: imagens da Kemi (faltou arquivo = Kemi desenhada em código).
 
-> Marcos entregues até aqui: 1 (fundação), 2 (Kemi Bolha), 3 (Pode Misturar?) e 4 (Kemi Sobe). O Kemi Runner ainda usa o jogo "em construção".
+> Marcos entregues até aqui: 1 (fundação), 2 (Kemi Bolha), 3 (Pode Misturar?), 4 (Kemi Sobe) e 5 (fechamento do evento). O Kemi Runner ainda usa o jogo "em construção".
 
 ## Conteúdo do Pode Misturar?
 
@@ -49,3 +49,11 @@ Os pares estão em `src/config/misturas.js` (EXEMPLOS `[VALIDAR]` — conferir c
 Para trocar pelas regras do simulador do app: `python scripts/importar_misturas.py dados/misturas.csv`
 (colunas: `produto_a, produto_b, perigosa, porque, fonte`; a ordem das linhas é a ordem de entrada no jogo).
 
+
+## Fechamento do evento (Marco 5)
+
+- **Fluxo ao sair da tela final:** contato (só Top 3 do jogo ou meta do brinde, com aceite LGPD e a opção "Sou de uma empresa") → convite de 4 s com 2 QR codes → destino.
+- **QR codes** são gerados localmente (`vendor/qrcode.js`, MIT). Os links ficam em `src/config/event.js` e no painel admin.
+- **Painel admin:** `Ctrl+Shift+A` + PIN (provisório: `2468` — troque no próprio painel). Busca por código de resgate, marcar entrega, apagar partida, exportar CSV/JSON, importar JSON (mescla estações), resetar o ranking do dia (baixa um backup antes) e ajustar metas, brindes, evento e jogos do hub.
+- **Prêmio Master:** líder do Ranking Geral; o admin mostra o líder atual e a contagem regressiva "Campeão em HH:MM:SS" aparece na atração e em `ranking.html`.
+- Os dados ficam no `localStorage` de cada navegador/computador: em mais de uma estação, exporte o JSON de cada uma e importe na principal no fim.

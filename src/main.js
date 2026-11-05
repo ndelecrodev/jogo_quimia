@@ -5,6 +5,7 @@ import { W, H, IDLE_MS } from './config/game.js';
 import { input } from './core/InputManager.js';
 import { sfx } from './core/Sfx.js';
 import { getSettings, setSettings, logError } from './core/Storage.js';
+import { toggleAdmin } from './admin/admin.js';
 
 import Boot from './scenes/Boot.js';
 import Attract from './scenes/Attract.js';
@@ -15,6 +16,8 @@ import BubbleGame from './scenes/BubbleGame.js';
 import MixGame from './scenes/MixGame.js';
 import SobeGame from './scenes/SobeGame.js';
 import DummyGame from './scenes/DummyGame.js';
+import Contact from './scenes/Contact.js';
+import Viral from './scenes/Viral.js';
 import GameOver from './scenes/GameOver.js';
 
 const game = new Phaser.Game({
@@ -26,7 +29,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   fps: { target: 60 },
   render: { antialias: true },
-  scene: [Boot, Attract, Nickname, Hub, Tutorial, BubbleGame, MixGame, SobeGame, DummyGame, GameOver],
+  scene: [Boot, Attract, Nickname, Hub, Tutorial, BubbleGame, MixGame, SobeGame, DummyGame, GameOver, Contact, Viral],
 });
 
 sfx.setMuted(getSettings().muted);
@@ -53,6 +56,14 @@ const crash = (where, err) => {
 };
 window.addEventListener('error', (e) => crash('window.error', e.error || e.message));
 window.addEventListener('unhandledrejection', (e) => crash('promise', e.reason));
+
+// ---- Painel admin oculto: Ctrl+Shift+A + PIN ----
+window.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') {
+    e.preventDefault();
+    toggleAdmin();
+  }
+});
 
 // ---- Loop global de input, mudo e ociosidade ----
 game.events.on('prestep', () => {

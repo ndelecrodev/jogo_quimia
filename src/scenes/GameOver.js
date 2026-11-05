@@ -58,6 +58,9 @@ export default class GameOver extends BaseScene {
     const posGame = official ? positionOfNick(rankGame(all, game), nick) : null;
     const posGen = official ? positionOfNick(rankGeneral(all), nick) : null;
 
+    // Captura de contato: só quem entrou no Top 3 do jogo ou atingiu a meta do brinde
+    this.eligible = official && ((posGame !== null && posGame <= 3) || prizes.includes('meta'));
+
     // --- Tela ---
     addBackground(this);
     this.bubbles = new BubbleField(this, 18);
@@ -98,7 +101,8 @@ export default class GameOver extends BaseScene {
       T(this, 1400, 470, 'Mostre este código para a equipe.', 'body', { color: COLORS.white });
       const names = prizes.map((p) => settings.prizes[p]);
       names.forEach((n, i) => T(this, 1400, 540 + i * 56, `Brinde: ${n}`, 'h3', { color: i === 0 ? COLORS.mint2 : COLORS.cyanLight }));
-      if (!prizes.includes('meta')) T(this, 1400, 650, `Meta do brinde extra: ${settings.minScores[game]} pontos`, 'caption', { color: COLORS.sky2 });
+      if (posGen === 1) T(this, 1400, 650, `1º no Geral: concorrendo ao ${settings.prizes.master}`, 'bodyS', { color: COLORS.neon });
+      else if (!prizes.includes('meta')) T(this, 1400, 650, `Meta do brinde extra: ${settings.minScores[game]} pontos`, 'caption', { color: COLORS.sky2 });
     } else {
       T(this, 1400, 440, 'Sem código desta vez.', 'h2', { color: COLORS.white });
       T(this, 1400, 520, 'Chame um amigo para jogar!', 'body', { color: COLORS.mint2 });
@@ -127,8 +131,8 @@ export default class GameOver extends BaseScene {
 
     // Botões
     this.btns = [
-      { label: 'JOGAR DE NOVO', do: () => this.scene.start(g.scene, { gameId: game }) },
-      { label: 'OUTRO JOGO', do: () => this.scene.start('Hub') },
+      { label: 'JOGAR DE NOVO', do: () => this.leave(g.scene, { gameId: game }) },
+      { label: 'OUTRO JOGO', do: () => this.leave('Hub') },
     ].map((b, i) => {
       const gfx = this.add.graphics();
       const t = T(this, 640 + i * 640, 990, b.label, 'buttonL');
@@ -136,6 +140,13 @@ export default class GameOver extends BaseScene {
     });
     this.sel = 0;
     this.refresh();
+  }
+
+  /** Saída da tela final: contato (se elegível) → convite com 2 QR → destino. */
+  leave(scene, data) {
+    const next = { scene, data };
+    if (this.eligible && !this.play.contact) this.scene.start('Contact', { playId: this.play.id, next });
+    else this.scene.start('Viral', { next });
   }
 
   refresh() {
@@ -157,6 +168,6 @@ export default class GameOver extends BaseScene {
     if (input.pressed('left') && this.sel > 0) { this.sel--; sfx.play('nav'); this.refresh(); }
     if (input.pressed('right') && this.sel < 1) { this.sel++; sfx.play('nav'); this.refresh(); }
     if (input.pressed('action')) { sfx.play('ok'); this.btns[this.sel].do(); }
-    if (input.pressed('back')) { sfx.play('back'); this.scene.start('Hub'); }
+    if (input.pressed('back')) { sfx.play('back'); this.leave('Hub'); }
   }
 }
