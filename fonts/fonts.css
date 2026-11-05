@@ -1,0 +1,4 @@
+/* Fontes empacotadas localmente (offline). */
+@font-face { font-family: 'Nunito'; font-weight: 700; font-style: normal; font-display: block; src: url('nunito-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 800; font-style: normal; font-display: block; src: url('nunito-latin-800-normal.woff2') format('woff2'); }
+@font-face { font-family: 'PT Sans'; font-weight: 400; font-style: normal; font-display: block; src: url('pt-sans-latin-400-normal.woff2') format('woff2'); }

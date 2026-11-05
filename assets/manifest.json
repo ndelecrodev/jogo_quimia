@@ -1,0 +1,11 @@
+{
+  "_info": "Para trocar uma imagem, substitua o arquivo em assets/kemi/ (PNG com fundo transparente). Se o arquivo não existir, o jogo desenha uma Kemi de reserva em código. Não precisa mexer no código.",
+  "images": {
+    "kemi_idle": "assets/kemi/kemi_idle.png",
+    "kemi_sleepy": "assets/kemi/kemi_sleepy.png",
+    "kemi_happy": "assets/kemi/kemi_happy.png",
+    "kemi_wink": "assets/kemi/kemi_wink.png",
+    "kemi_side": "assets/kemi/kemi_side.png",
+    "kemi_down": "assets/kemi/kemi_down.png"
+  }
+}
