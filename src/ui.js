@@ -85,7 +85,10 @@ export function drawQR(scene, x, y, size, text) {
   return g;
 }
 
-export function kemiKey(scene) {
+/** Textura da Kemi numa pose (idle, sleepy, happy, wink, side, down). Falta o arquivo? usa idle ou a Kemi desenhada em código. */
+export function kemiKey(scene, pose = 'idle') {
+  const k = `kemi_${pose}`;
+  if (scene.textures.exists(k)) return k;
   return scene.textures.exists('kemi_idle') ? 'kemi_idle' : 'kemi';
 }
 

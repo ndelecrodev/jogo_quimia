@@ -26,7 +26,7 @@ export default class Viral extends BaseScene {
     // Dois QR codes
     this.qrBox(560, 'PARA VOCÊ', 'Em breve: entre na lista de espera', s.urlUser);
     this.qrBox(1360, 'PARA EMPRESAS', 'Conheça o painel da Quimia', s.urlCompany);
-    fitImage(this.add.image(960, 560, kemiKey(this)).setDepth(5), 200);
+    fitImage(this.add.image(960, 560, kemiKey(this, 'wink')).setDepth(5), 200);
 
     // Progresso
     const bar = this.add.rectangle(560, 1010, 0, 12, hex(COLORS.neon)).setOrigin(0, 0.5);

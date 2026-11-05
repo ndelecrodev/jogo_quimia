@@ -139,7 +139,9 @@ export default class Nickname extends BaseScene {
   go(nick) {
     sfx.play('ok');
     this.registry.set('nick', nick);
-    this.scene.start('Hub');
+    const solo = this.registry.get('solo');
+    if (solo) this.scene.start('Tutorial', { gameId: solo });
+    else this.scene.start('Hub');
   }
 
   moveVertical(dir) {

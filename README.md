@@ -35,7 +35,7 @@ Cada partida termina por 3 vidas ou 120 s. A dificuldade sobe por pontos, não p
 python servir.py
 ```
 
-Abra http://127.0.0.1:8000/ (jogo) e http://127.0.0.1:8000/ranking (TV). No Windows, também dá para dar dois cliques em `iniciar_sem_node.bat`.
+Abra http://127.0.0.1:8000/ (jogo) e http://127.0.0.1:8000/ranking (TV). No Windows, `iniciar.bat` abre o jogo em tela cheia (modo quiosque) e `iniciar_ranking.bat` abre a TV do ranking. Em um só jogo (plano B): `?jogo=bolha`, `?jogo=misturar` ou `?jogo=sobe` no endereço.
 
 ### Com Node (desenvolvimento)
 
@@ -69,7 +69,7 @@ src/config/                dificuldade, brindes, evento, misturas, fatos
 src/admin/                 painel admin
 assets/                    manifest.json e imagens da Kemi
 vendor/, fonts/            Phaser, gerador de QR e fontes locais
-scripts/                   importador de misturas
+scripts/                   importador de misturas e recorte da Kemi
 tests/                     testes (Vitest)
 ```
 
@@ -96,7 +96,7 @@ Tudo fica no `localStorage` do navegador; não há servidor. O apelido aparece n
 
 ## Status
 
-Em desenvolvimento para a feira. Falta a parte de operação (guia do stand, checklist e scripts de início) e o polimento. O Kemi Runner é opcional.
+Em desenvolvimento para a feira. Guia do stand em [LEIA-ME_FEIRA.md](LEIA-ME_FEIRA.md), checklist em [CHECKLIST_FEIRA.md](CHECKLIST_FEIRA.md) e arte pendente em [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md). O Kemi Runner é opcional.
 
 ## Licença
 

@@ -199,7 +199,7 @@ export default class SobeGame extends BaseScene {
     if (this.ready()) {
       if (this.paused) {
         if (input.pressed('action') || input.pressed('pause')) this.setPause(false);
-        else if (input.pressed('back')) this.scene.start('Hub');
+        else if (input.pressed('back')) this.scene.start(this.registry.get('solo') ? 'Attract' : 'Hub');
         return;
       }
       if (this.started && (input.pressed('pause') || input.pressed('back'))) return this.setPause(true);

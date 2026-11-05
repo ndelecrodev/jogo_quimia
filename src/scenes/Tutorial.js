@@ -47,6 +47,6 @@ export default class Tutorial extends BaseScene {
   update(_, delta) {
     this.bubbles.update(delta);
     if (this.ready() && input.pressed('action')) { sfx.play('ok'); this.start(); }
-    if (this.ready() && input.pressed('back')) { sfx.play('back'); this.started = true; this.scene.start('Hub'); }
+    if (this.ready() && input.pressed('back')) { sfx.play('back'); this.started = true; this.scene.start(this.registry.get('solo') ? 'Attract' : 'Hub'); }
   }
 }

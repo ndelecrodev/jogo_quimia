@@ -21,8 +21,13 @@ export default class Attract extends BaseScene {
     this.bubbles = new BubbleField(this, 26);
 
     // Kemi
-    this.kemi = fitImage(this.add.image(520, 470, kemiKey(this)).setDepth(5), 520);
+    this.kemi = fitImage(this.add.image(520, 470, kemiKey(this)).setDepth(5), 460);
     this.tweens.add({ targets: this.kemi, y: 440, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+
+    // a Kemi troca de pose de tempos em tempos
+    const poses = ['idle', 'wink', 'happy', 'sleepy', 'side'];
+    let pi = 0;
+    this.time.addEvent({ delay: 2600, loop: true, callback: () => this.kemi.setTexture(kemiKey(this, poses[++pi % poses.length])) });
 
     T(this, 520, 130, 'QUIMIA ARCADE', 'display', { color: COLORS.neon, depth: 5 });
     T(this, 520, 215, 'Jogue, suba no ranking e ganhe brindes!', 'bodyL', { color: COLORS.mint2, depth: 5 });

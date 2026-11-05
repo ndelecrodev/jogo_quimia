@@ -187,6 +187,7 @@ export default class MixGame extends BaseScene {
       if (!this.fxReduced) burst(this, 960, 600, 10);
       this.tweens.add({ targets: l, x: LEFT_X + 70, duration: 160, yoyo: true });
       this.tweens.add({ targets: r, x: RIGHT_X - 70, duration: 160, yoyo: true });
+      this.kemi.setTexture(kemiKey(this, Math.random() < 0.5 ? 'happy' : 'wink'));
       this.tweens.add({ targets: this.kemi, y: this.kemiY - 40, duration: 140, yoyo: true, ease: 'Quad.easeOut' });
       this.comboText.setText(Math.min(5, 1 + Math.floor(this.streak / 3)) > 1 ? `COMBO x${Math.min(5, 1 + Math.floor(this.streak / 3))}` : '');
       this.time.delayedCall(380, () => this.afterFeedback());
@@ -199,6 +200,7 @@ export default class MixGame extends BaseScene {
       this.cameras.main.shake(this.fxReduced ? 0 : 200, 0.005);
       this.question.setText(choice === null ? 'Tempo!' : 'Ops!').setColor(COLORS.danger);
       this.plus.setText(pair.perigosa ? 'Era PERIGOSO' : 'Era SEGURO').setColor(COLORS.danger).setFontSize('64px');
+      this.kemi.setTexture(kemiKey(this, 'down'));
       this.kemi.setTint(0xff7a7a);
       this.tweens.add({ targets: this.kemi, x: 985, duration: 50, yoyo: true, repeat: 4, onComplete: () => { this.kemi.setX(960); this.kemi.clearTint(); } });
       if (!this.wrong.some((w) => w.pair === pair)) this.wrong.push({ pair });
@@ -208,6 +210,7 @@ export default class MixGame extends BaseScene {
 
   afterFeedback() {
     if (this.ended) return;
+    this.kemi.setTexture(kemiKey(this));
     this.plus.setFontSize('150px');
     if (this.lives <= 0) return this.finish('lives');
     const lvl = mixParams(this.points, this.elapsed, this.maxTime).level;
@@ -253,7 +256,7 @@ export default class MixGame extends BaseScene {
     if (this.ready()) {
       if (this.paused) {
         if (input.pressed('action') || input.pressed('pause')) this.setPause(false);
-        else if (input.pressed('back')) this.scene.start('Hub');
+        else if (input.pressed('back')) this.scene.start(this.registry.get('solo') ? 'Attract' : 'Hub');
         return;
       }
       if (this.started && (input.pressed('pause') || input.pressed('back'))) return this.setPause(true);

@@ -6,6 +6,7 @@ import { input } from './core/InputManager.js';
 import { sfx } from './core/Sfx.js';
 import { getSettings, setSettings, logError } from './core/Storage.js';
 import { toggleAdmin } from './admin/admin.js';
+import { GAMES } from './config/games.js';
 
 import Boot from './scenes/Boot.js';
 import Attract from './scenes/Attract.js';
@@ -33,6 +34,22 @@ const game = new Phaser.Game({
 });
 
 sfx.setMuted(getSettings().muted);
+
+// ---- Plano B: index.html?jogo=bolha | misturar | sobe abre só aquele jogo (sem hub) ----
+const solo = new URLSearchParams(location.search).get('jogo');
+if (solo && GAMES.some((g) => g.id === solo)) game.registry.set('solo', solo);
+
+// ---- Mantém a tela acesa durante o evento (quando o navegador permitir) ----
+let wakeLock = null;
+const keepAwake = async () => {
+  try {
+    if ('wakeLock' in navigator && document.visibilityState === 'visible') wakeLock = await navigator.wakeLock.request('screen');
+  } catch (_) {
+    /* sem suporte ou negado: segue sem */
+  }
+};
+keepAwake();
+document.addEventListener('visibilitychange', keepAwake);
 
 // ---- Indicador de controle ----
 const hud = document.getElementById('hud');

@@ -72,7 +72,7 @@ export default class GameOver extends BaseScene {
     // Card esquerdo: pontos e posições
     const left = this.add.graphics();
     drawCard(left, 120, 190, 800, 500, { stroke: COLORS.elevated2 });
-    fitImage(this.add.image(300, 330, kemiKey(this)), 200);
+    fitImage(this.add.image(300, 330, kemiKey(this, official ? 'happy' : 'sleepy')), 200);
     const scoreText = T(this, 640, 300, '0', 'display', { color: COLORS.white, fontSize: '170px' });
     T(this, 640, 400, 'PONTOS', 'overline', { color: COLORS.sky2 });
     this.tweens.addCounter({
@@ -130,9 +130,11 @@ export default class GameOver extends BaseScene {
     T(this, 960, 925, 'Quer saber mais? Pergunte pra Kemi no app Quimia (em breve).', 'caption', { color: COLORS.sky2 });
 
     // Botões
+    const solo = !!this.registry.get('solo'); // modo "um jogo isolado" (plano B): sem hub
+    const home = solo ? 'Attract' : 'Hub';
     this.btns = [
       { label: 'JOGAR DE NOVO', do: () => this.leave(g.scene, { gameId: game }) },
-      { label: 'OUTRO JOGO', do: () => this.leave('Hub') },
+      { label: solo ? 'SAIR' : 'OUTRO JOGO', do: () => this.leave(home) },
     ].map((b, i) => {
       const gfx = this.add.graphics();
       const t = T(this, 640 + i * 640, 990, b.label, 'buttonL');
@@ -168,6 +170,6 @@ export default class GameOver extends BaseScene {
     if (input.pressed('left') && this.sel > 0) { this.sel--; sfx.play('nav'); this.refresh(); }
     if (input.pressed('right') && this.sel < 1) { this.sel++; sfx.play('nav'); this.refresh(); }
     if (input.pressed('action')) { sfx.play('ok'); this.btns[this.sel].do(); }
-    if (input.pressed('back')) { sfx.play('back'); this.leave('Hub'); }
+    if (input.pressed('back')) { sfx.play('back'); this.leave(this.registry.get('solo') ? 'Attract' : 'Hub'); }
   }
 }
