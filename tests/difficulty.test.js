@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BUBBLE_LEVELS, MIX_LEVELS, levelFor, pressureBonus, bubbleParams, mixParams } from '../src/config/difficulty.js';
+import { BUBBLE_LEVELS, MIX_LEVELS, SOBE_LEVELS, SOBE_APEX, levelFor, pressureBonus, bubbleParams, mixParams, sobeParams } from '../src/config/difficulty.js';
 import { MAX_TIME_MS } from '../src/config/game.js';
 
 describe('nível por pontos', () => {
@@ -25,6 +25,19 @@ describe('Kemi Bolha: tabela de níveis', () => {
       const subidaPossivel = 440 * tempoEntreFrascos * 0.6; // 60% de folga para humano
       expect(l.maxDelta).toBeLessThanOrEqual(subidaPossivel);
     }
+  });
+});
+
+describe('Kemi Sobe: prateleiras sempre alcançáveis', () => {
+  it('o vão máximo entre linhas cabe no pulo (com folga) e os obstáculos entram nos níveis certos', () => {
+    for (const l of SOBE_LEVELS) expect(l.gapMax).toBeLessThanOrEqual(SOBE_APEX * 0.8);
+    expect(SOBE_LEVELS[2].moving).toBe(0);
+    expect(SOBE_LEVELS[3].moving).toBeGreaterThan(0); // nível 4 (índice 3): prateleiras que andam
+    expect(SOBE_LEVELS[3].cloud).toBe(0);
+    expect(SOBE_LEVELS[4].cloud).toBeGreaterThan(0); // vapores
+    expect(SOBE_LEVELS[4].breaking).toBe(0);
+    expect(SOBE_LEVELS[5].breaking).toBeGreaterThan(0); // prateleiras que quebram
+    expect(sobeParams(0, 0)).toMatchObject(SOBE_LEVELS[0]);
   });
 });
 

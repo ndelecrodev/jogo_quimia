@@ -41,7 +41,7 @@ npm run build    # gera a pasta dist/
 - `src/config/fatos.js`: frases do "Você sabia?".
 - `assets/manifest.json` e `assets/kemi/`: imagens da Kemi (faltou arquivo = Kemi desenhada em código).
 
-> Marcos entregues até aqui: 1 (fundação), 2 (Kemi Bolha) e 3 (Pode Misturar?). Kemi Sobe ainda usa o jogo "em construção".
+> Marcos entregues até aqui: 1 (fundação), 2 (Kemi Bolha), 3 (Pode Misturar?) e 4 (Kemi Sobe). O Kemi Runner ainda usa o jogo "em construção".
 
 ## Conteúdo do Pode Misturar?
 

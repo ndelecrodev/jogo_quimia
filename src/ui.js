@@ -131,6 +131,61 @@ export function makeTextures(scene) {
     g.fillEllipse(30, 28, 20, 11);
   });
 
+  // ---- Kemi Sobe: prateleiras, vapor e power-ups ----
+  mk('plat_n', 256, 36, (g) => {
+    g.fillStyle(hex(COLORS.elevated2), 1);
+    g.fillRoundedRect(2, 4, 252, 28, 12);
+    g.lineStyle(6, hex(COLORS.neon), 1);
+    g.strokeRoundedRect(2, 4, 252, 28, 12);
+    g.fillStyle(0xffffff, 0.25);
+    g.fillRoundedRect(16, 9, 224, 6, 3);
+  });
+  mk('plat_m', 256, 36, (g) => {
+    g.fillStyle(hex(COLORS.elevated), 1);
+    g.fillRoundedRect(2, 4, 252, 28, 12);
+    g.lineStyle(6, hex(COLORS.sky), 1);
+    g.strokeRoundedRect(2, 4, 252, 28, 12);
+    g.fillStyle(hex(COLORS.sky), 1); // setinhas ◄ ►
+    g.fillTriangle(24, 18, 40, 10, 40, 26);
+    g.fillTriangle(232, 18, 216, 10, 216, 26);
+  });
+  mk('plat_b', 256, 36, (g) => {
+    g.fillStyle(hex(COLORS.teal3), 1);
+    g.fillRoundedRect(2, 4, 252, 28, 12);
+    g.lineStyle(6, hex(COLORS.mint1), 1);
+    g.strokeRoundedRect(2, 4, 252, 28, 12);
+    g.lineStyle(4, hex(COLORS.bg), 1); // rachaduras
+    g.beginPath();
+    g.moveTo(80, 4); g.lineTo(96, 18); g.lineTo(84, 24); g.lineTo(100, 32);
+    g.moveTo(170, 4); g.lineTo(158, 16); g.lineTo(174, 24); g.lineTo(162, 32);
+    g.strokePath();
+  });
+  mk('vapor', 192, 128, (g) => {
+    g.fillStyle(hex(COLORS.danger), 0.55);
+    [[60, 78, 46], [110, 58, 54], [150, 80, 42], [98, 88, 46]].forEach(([x, y, r]) => g.fillCircle(x, y, r));
+    g.fillStyle(0x10233f, 1);
+    g.fillEllipse(84, 74, 9, 16);
+    g.fillEllipse(116, 74, 9, 16);
+  });
+  mk('pu_rocket', 96, 96, (g) => {
+    g.fillStyle(hex(COLORS.neon), 1);
+    g.fillCircle(48, 48, 38);
+    g.lineStyle(6, hex(COLORS.darkText), 1);
+    g.strokeCircle(48, 48, 38);
+    g.fillStyle(hex(COLORS.darkText), 1);
+    g.fillTriangle(48, 20, 30, 56, 66, 56); // seta para cima
+    g.fillRect(41, 56, 14, 16);
+  });
+  mk('pu_shield', 96, 96, (g) => {
+    g.fillStyle(hex(COLORS.cyanDark), 1);
+    g.fillCircle(48, 48, 38);
+    g.lineStyle(6, 0xffffff, 1);
+    g.strokeCircle(48, 48, 38);
+    g.fillStyle(0xffffff, 1);
+    g.fillRect(42, 26, 12, 44); // cruz de segurança
+    g.fillRect(26, 42, 44, 12);
+  });
+
   // Kemi de reserva (desenhada em código) — usada se assets/kemi/*.png não existirem.
   mk('kemi', 256, 256, (g) => {
     const blue = 0x9ed8f5;

@@ -2,7 +2,7 @@
 import { MAX_TIME_MS } from './game.js';
 
 // Quantos pontos para subir 1 nível, por jogo.
-export const PONTOS_POR_NIVEL = { bolha: 4, misturar: 5, sobe: 150, runner: 120 };
+export const PONTOS_POR_NIVEL = { bolha: 4, misturar: 5, sobe: 200, runner: 120 };
 
 // "par" de cada jogo: pontuação Quimia = round(pontos / par * 1000). [VALIDAR em playtest]
 export const PARS = { bolha: 30, misturar: 40, sobe: 1200, runner: 1000 };
@@ -42,6 +42,23 @@ export const MIX_LEVELS = [
   { timeMs: 1000, unlocked: 14 },
 ];
 
+// Kemi Sobe — física do quique e tabela por nível. Pontos = altura / 10.
+// Nível 3+: prateleiras que andam. 4+: vapores (perdem vida). 5+: prateleiras que quebram.
+export const SOBE_PHYSICS = { gravity: 2400, bounce: 1150, speedX: 650 };
+export const SOBE_APEX = (SOBE_PHYSICS.bounce ** 2) / (2 * SOBE_PHYSICS.gravity); // ~275 px
+export const SOBE_LEVELS = [
+  { gapMin: 110, gapMax: 150, w: 210, moving: 0, breaking: 0, cloud: 0 },
+  { gapMin: 115, gapMax: 160, w: 210, moving: 0, breaking: 0, cloud: 0 },
+  { gapMin: 120, gapMax: 170, w: 200, moving: 0, breaking: 0, cloud: 0 },
+  { gapMin: 125, gapMax: 180, w: 200, moving: 0.25, breaking: 0, cloud: 0 },
+  { gapMin: 130, gapMax: 185, w: 190, moving: 0.3, breaking: 0, cloud: 0.12 },
+  { gapMin: 135, gapMax: 195, w: 190, moving: 0.3, breaking: 0.25, cloud: 0.15 },
+  { gapMin: 140, gapMax: 200, w: 180, moving: 0.35, breaking: 0.3, cloud: 0.18 },
+  { gapMin: 145, gapMax: 205, w: 170, moving: 0.35, breaking: 0.3, cloud: 0.2 },
+  { gapMin: 150, gapMax: 210, w: 160, moving: 0.4, breaking: 0.35, cloud: 0.22 },
+  { gapMin: 155, gapMax: 215, w: 150, moving: 0.4, breaking: 0.35, cloud: 0.25 },
+];
+
 export function levelFor(points, perLevel, maxLevel) {
   return Math.min(Math.max(0, Math.floor(points / perLevel)), maxLevel);
 }
@@ -51,6 +68,13 @@ export function pressureBonus(elapsedMs, capMs = MAX_TIME_MS) {
   const start = capMs * 0.75;
   if (elapsedMs <= start) return 0;
   return 1 + Math.floor((elapsedMs - start) / 10000);
+}
+
+export function sobeParams(points, elapsedMs, capMs = MAX_TIME_MS) {
+  const last = SOBE_LEVELS.length - 1;
+  const level = levelFor(points, PONTOS_POR_NIVEL.sobe, last);
+  const eff = Math.min(last, level + pressureBonus(elapsedMs, capMs));
+  return { level, ...SOBE_LEVELS[eff] };
 }
 
 export function mixParams(points, elapsedMs, capMs = MAX_TIME_MS) {

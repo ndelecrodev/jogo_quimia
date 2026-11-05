@@ -23,8 +23,8 @@ export const GAMES = [
   {
     id: 'sobe',
     name: 'Kemi Sobe',
-    scene: 'DummyGame',
-    ready: false,
+    scene: 'SobeGame',
+    ready: true,
     enabledByDefault: true,
     desc: 'Quique de prateleira em prateleira.',
     tip: 'Mova para os lados',
