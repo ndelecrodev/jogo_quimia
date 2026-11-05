@@ -13,7 +13,7 @@ A Quimia é uma plataforma de segurança química doméstica: transforma as Fich
 | **Kemi Bolha** | Suba com a Kemi e passe pelos vãos entre os frascos. 3 vidas, bolhinhas bônus. |
 | **Pode Misturar?** | Dois produtos aparecem: seguro ou perigoso? Combo, tempo cada vez menor e, no fim, os pares que você errou com o porquê. |
 | **Kemi Sobe** | Quique de prateleira em prateleira. Prateleiras que andam e quebram, vapores, tampinha-foguete e escudo-FDS. |
-| **Kemi Runner** | Em desenvolvimento (só entra se sobrar tempo). |
+| **Kemi Runner** | A Kemi corre pela prateleira: segure o botão para pular mais alto, ↓ para abaixar nos vapores. Os obstáculos sempre dão para superar. |
 
 Cada partida termina por 3 vidas ou 120 s. A dificuldade sobe por pontos, não por tempo, e os primeiros segundos são fáceis de propósito.
 
@@ -35,7 +35,7 @@ Cada partida termina por 3 vidas ou 120 s. A dificuldade sobe por pontos, não p
 python servir.py
 ```
 
-Abra http://127.0.0.1:8000/ (jogo) e http://127.0.0.1:8000/ranking (TV). No Windows, `iniciar.bat` abre o jogo em tela cheia (modo quiosque) e `iniciar_ranking.bat` abre a TV do ranking. Em um só jogo (plano B): `?jogo=bolha`, `?jogo=misturar` ou `?jogo=sobe` no endereço.
+Abra http://127.0.0.1:8000/ (jogo) e http://127.0.0.1:8000/ranking (TV). No Windows, `iniciar.bat` abre o jogo em tela cheia (modo quiosque) e `iniciar_ranking.bat` abre a TV do ranking. Em um só jogo (plano B): `?jogo=bolha`, `?jogo=misturar`, `?jogo=sobe` ou `?jogo=runner` no endereço.
 
 ### Com Node (desenvolvimento)
 
@@ -96,7 +96,7 @@ Tudo fica no `localStorage` do navegador; não há servidor. O apelido aparece n
 
 ## Status
 
-Em desenvolvimento para a feira. Guia do stand em [LEIA-ME_FEIRA.md](LEIA-ME_FEIRA.md), checklist em [CHECKLIST_FEIRA.md](CHECKLIST_FEIRA.md) e arte pendente em [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md). O Kemi Runner é opcional.
+Em desenvolvimento para a feira. Guia do stand em [LEIA-ME_FEIRA.md](LEIA-ME_FEIRA.md), checklist em [CHECKLIST_FEIRA.md](CHECKLIST_FEIRA.md) e arte pendente em [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md).
 
 ## Licença
 

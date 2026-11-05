@@ -2,7 +2,7 @@
 import { MAX_TIME_MS } from './game.js';
 
 // Quantos pontos para subir 1 nível, por jogo.
-export const PONTOS_POR_NIVEL = { bolha: 4, misturar: 5, sobe: 200, runner: 120 };
+export const PONTOS_POR_NIVEL = { bolha: 4, misturar: 5, sobe: 200, runner: 160 };
 
 // "par" de cada jogo: pontuação Quimia = round(pontos / par * 1000). [VALIDAR em playtest]
 export const PARS = { bolha: 30, misturar: 40, sobe: 1200, runner: 1000 };
@@ -59,6 +59,28 @@ export const SOBE_LEVELS = [
   { gapMin: 155, gapMax: 215, w: 150, moving: 0.4, breaking: 0.35, cloud: 0.25 },
 ];
 
+// Kemi Runner — pulo (segurar = mais alto) e abaixar. Pontos = distância/40 + 25 por bolhinha.
+// Regras que garantem que NUNCA existe obstáculo impossível:
+//  - a altura dos frascos cabe no pulo cheio com folga (altura <= 80% do ápice);
+//  - o vazio entre grupos de obstáculos dura >= 1,05 s (tempo de pousar e pular de novo);
+//  - o grupo de 2 frascos baixos só aparece quando cabe num único pulo (vão <= 42% da velocidade).
+export const RUNNER_PHYSICS = { gravity: 3200, jump: 1250, cutJump: 420 };
+export const RUNNER_APEX = (RUNNER_PHYSICS.jump ** 2) / (2 * RUNNER_PHYSICS.gravity); // ~244 px
+export const RUNNER_OBSTACLES = { low: 110, tall: 180, bottleW: 70, tallW: 78, clusterGap: 110 };
+export const RUNNER_CLUSTER_SPAN = RUNNER_OBSTACLES.bottleW * 2 + RUNNER_OBSTACLES.clusterGap;
+export const RUNNER_LEVELS = [
+  { speed: 520, tall: 0, vapor: 0, cluster: 0, gapMin: 1.35, gapMax: 1.9 },
+  { speed: 560, tall: 0.25, vapor: 0, cluster: 0, gapMin: 1.3, gapMax: 1.8 },
+  { speed: 600, tall: 0.3, vapor: 0.2, cluster: 0, gapMin: 1.25, gapMax: 1.7 },
+  { speed: 640, tall: 0.3, vapor: 0.25, cluster: 0, gapMin: 1.2, gapMax: 1.65 },
+  { speed: 690, tall: 0.3, vapor: 0.3, cluster: 0.15, gapMin: 1.15, gapMax: 1.6 },
+  { speed: 740, tall: 0.35, vapor: 0.3, cluster: 0.2, gapMin: 1.1, gapMax: 1.55 },
+  { speed: 790, tall: 0.35, vapor: 0.35, cluster: 0.25, gapMin: 1.1, gapMax: 1.5 },
+  { speed: 840, tall: 0.4, vapor: 0.35, cluster: 0.25, gapMin: 1.05, gapMax: 1.45 },
+  { speed: 890, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
+  { speed: 940, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
+];
+
 export function levelFor(points, perLevel, maxLevel) {
   return Math.min(Math.max(0, Math.floor(points / perLevel)), maxLevel);
 }
@@ -68,6 +90,13 @@ export function pressureBonus(elapsedMs, capMs = MAX_TIME_MS) {
   const start = capMs * 0.75;
   if (elapsedMs <= start) return 0;
   return 1 + Math.floor((elapsedMs - start) / 10000);
+}
+
+export function runnerParams(points, elapsedMs, capMs = MAX_TIME_MS) {
+  const last = RUNNER_LEVELS.length - 1;
+  const level = levelFor(points, PONTOS_POR_NIVEL.runner, last);
+  const eff = Math.min(last, level + pressureBonus(elapsedMs, capMs));
+  return { level, ...RUNNER_LEVELS[eff] };
 }
 
 export function sobeParams(points, elapsedMs, capMs = MAX_TIME_MS) {

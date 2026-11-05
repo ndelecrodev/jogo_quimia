@@ -33,11 +33,11 @@ export const GAMES = [
   {
     id: 'runner',
     name: 'Kemi Runner',
-    scene: 'DummyGame',
-    ready: false,
-    enabledByDefault: false, // só se sobrar tempo
-    desc: 'Corra pela estante e pule os frascos.',
-    tip: 'Aperte para pular',
+    scene: 'RunnerGame',
+    ready: true,
+    enabledByDefault: true,
+    desc: 'Corra pela estante, pule os frascos e abaixe nos vapores.',
+    tip: 'Segure para pular mais alto  ·  ↓ abaixa',
     keys: 'ESPAÇO  ou  ✕',
   },
 ];

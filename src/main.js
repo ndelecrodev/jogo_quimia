@@ -16,6 +16,7 @@ import Tutorial from './scenes/Tutorial.js';
 import BubbleGame from './scenes/BubbleGame.js';
 import MixGame from './scenes/MixGame.js';
 import SobeGame from './scenes/SobeGame.js';
+import RunnerGame from './scenes/RunnerGame.js';
 import DummyGame from './scenes/DummyGame.js';
 import Contact from './scenes/Contact.js';
 import Viral from './scenes/Viral.js';
@@ -30,7 +31,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   fps: { target: 60 },
   render: { antialias: true },
-  scene: [Boot, Attract, Nickname, Hub, Tutorial, BubbleGame, MixGame, SobeGame, DummyGame, GameOver, Contact, Viral],
+  scene: [Boot, Attract, Nickname, Hub, Tutorial, BubbleGame, MixGame, SobeGame, RunnerGame, DummyGame, GameOver, Contact, Viral],
 });
 
 sfx.setMuted(getSettings().muted);

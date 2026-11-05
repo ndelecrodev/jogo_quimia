@@ -34,6 +34,7 @@ Abra o endereço direto com o jogo escolhido (sem hub):
 - Kemi Bolha: `http://127.0.0.1:8000/?jogo=bolha`
 - Pode Misturar?: `http://127.0.0.1:8000/?jogo=misturar`
 - Kemi Sobe: `http://127.0.0.1:8000/?jogo=sobe`
+- Kemi Runner: `http://127.0.0.1:8000/?jogo=runner`
 
 Dá para colocar na barra do Chrome (F6) com o `iniciar.bat` aberto, ou editar o endereço no fim do `iniciar.bat`.
 Se o servidor não subir, abra o Prompt de Comando na pasta e rode `python servir.py`.

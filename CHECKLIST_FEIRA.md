@@ -9,7 +9,7 @@ Marque cada item. Faça a parte "Véspera" com tudo montado como será no stand.
 - [ ] Controle de PS5 conecta e o aviso "Controle conectado" aparece (também testar o cabo USB).
 - [ ] Teclado funciona (Espaço, setas, Esc).
 - [ ] TV/2º monitor: `iniciar_ranking.bat` mostra o ranking e atualiza depois de uma partida.
-- [ ] **Jogou os 3 jogos até o fim** (Kemi Bolha, Pode Misturar?, Kemi Sobe) com teclado **e** controle.
+- [ ] **Jogou os 4 jogos até o fim** (Kemi Bolha, Pode Misturar?, Kemi Sobe, Kemi Runner) com teclado **e** controle.
 - [ ] Tela final mostra pontos, posição, código de resgate e brinde.
 - [ ] Entrou no Top 3: aparece a tela de contato (testar o aceite LGPD) e depois os 2 QR codes.
 - [ ] **QR codes abrem a página certa** ao escanear com um celular (usuário e empresa).

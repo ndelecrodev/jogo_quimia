@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BUBBLE_LEVELS, MIX_LEVELS, SOBE_LEVELS, SOBE_APEX, levelFor, pressureBonus, bubbleParams, mixParams, sobeParams } from '../src/config/difficulty.js';
+import { BUBBLE_LEVELS, MIX_LEVELS, SOBE_LEVELS, SOBE_APEX, RUNNER_LEVELS, RUNNER_APEX, RUNNER_OBSTACLES, RUNNER_CLUSTER_SPAN, runnerParams, levelFor, pressureBonus, bubbleParams, mixParams, sobeParams } from '../src/config/difficulty.js';
 import { MAX_TIME_MS } from '../src/config/game.js';
 
 describe('nível por pontos', () => {
@@ -25,6 +25,21 @@ describe('Kemi Bolha: tabela de níveis', () => {
       const subidaPossivel = 440 * tempoEntreFrascos * 0.6; // 60% de folga para humano
       expect(l.maxDelta).toBeLessThanOrEqual(subidaPossivel);
     }
+  });
+});
+
+describe('Kemi Runner: obstáculos sempre superáveis', () => {
+  it('os frascos cabem no pulo cheio com folga e o vazio entre grupos dá tempo de pousar e pular', () => {
+    expect(RUNNER_OBSTACLES.tall).toBeLessThanOrEqual(RUNNER_APEX * 0.8);
+    expect(RUNNER_OBSTACLES.low).toBeLessThan(RUNNER_OBSTACLES.tall);
+    for (const l of RUNNER_LEVELS) {
+      expect(l.gapMin).toBeGreaterThanOrEqual(1.05);
+      expect(l.gapMax).toBeGreaterThanOrEqual(l.gapMin);
+      if (l.cluster > 0) expect(RUNNER_CLUSTER_SPAN).toBeLessThanOrEqual(0.42 * l.speed); // cabe num único pulo
+    }
+    for (let i = 1; i < RUNNER_LEVELS.length; i++) expect(RUNNER_LEVELS[i].speed).toBeGreaterThan(RUNNER_LEVELS[i - 1].speed);
+    expect(runnerParams(0, 0)).toMatchObject(RUNNER_LEVELS[0]);
+    expect(RUNNER_LEVELS[0].vapor + RUNNER_LEVELS[0].cluster + RUNNER_LEVELS[0].tall).toBe(0); // começo fácil
   });
 });
 

@@ -7,9 +7,7 @@ import { getPlays, getSettings } from '../core/Storage.js';
 import { rankGame, officialAttempts } from '../core/Ranking.js';
 import { GAMES } from '../config/games.js';
 
-const CARD_W = 520;
 const CARD_H = 640;
-const GAP = 60;
 
 // Hub: um card grande por jogo. D-pad/setas navegam, ação confirma.
 export default class Hub extends BaseScene {
@@ -41,16 +39,20 @@ export default class Hub extends BaseScene {
     );
 
     const n = this.games.length;
+    const compact = n > 3; // 4 jogos: cards mais estreitos para caber nos 1920 px
+    const CARD_W = compact ? 400 : 520;
+    const GAP = compact ? 40 : 60;
+    this.cardW = CARD_W;
     const total = n * CARD_W + (n - 1) * GAP;
     this.cards = this.games.map((g, i) => {
       const cx = 960 - total / 2 + CARD_W / 2 + i * (CARD_W + GAP);
       const c = this.add.container(cx, 600);
       const gfx = this.add.graphics();
       c.add(gfx);
-      const kemi = fitImage(this.add.image(0, -170, kemiKey(this)), 230);
+      const kemi = fitImage(this.add.image(0, -170, kemiKey(this)), compact ? 190 : 230);
       c.add(kemi);
-      c.add(T(this, 0, 10, g.name, 'h2', { color: COLORS.white }));
-      c.add(T(this, 0, 85, g.desc, 'body', { color: COLORS.mint2, align: 'center', wordWrap: { width: CARD_W - 60 } }));
+      c.add(T(this, 0, 10, g.name, compact ? 'h3' : 'h2', { color: COLORS.white }));
+      c.add(T(this, 0, 85, g.desc, 'body', { color: COLORS.mint2, align: 'center', wordWrap: { width: CARD_W - 50 } }));
       const best = rankGame(plays, g.id)[0];
       c.add(T(this, 0, 215, best ? `Melhor: ${best.points}` : 'Seja o primeiro!', 'h3', { color: COLORS.neon }));
       if (best) c.add(T(this, 0, 262, best.nick, 'label', { color: COLORS.cyan }));
@@ -64,7 +66,7 @@ export default class Hub extends BaseScene {
   refresh() {
     this.cards.forEach((c, i) => {
       const on = i === this.sel;
-      drawCard(c.gfx, -CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, {
+      drawCard(c.gfx, -this.cardW / 2, -CARD_H / 2, this.cardW, CARD_H, {
         fill: on ? COLORS.elevated : COLORS.card,
         stroke: on ? COLORS.neon : COLORS.elevated2,
         sw: on ? 8 : 3,
