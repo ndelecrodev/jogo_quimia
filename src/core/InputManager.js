@@ -54,6 +54,7 @@ class InputManager {
       if (this.textMode && this.textHandlers.size && !e.metaKey && !(e.ctrlKey && !e.altKey)) {
         this.textHandlers.forEach((cb) => cb(e));
       }
+      this.lastCode = e.code; // diagnóstico (F3)
       this.keys.add(e.code);
       this.tapped.add(e.code); // garante que toques rápidos (down+up entre dois frames) não se percam
       this.lastInputAt = Date.now();
@@ -105,12 +106,13 @@ class InputManager {
     let pad = this.padIndex != null ? pads.find((p) => p.index === this.padIndex && p.connected) : null;
     if (!pad) {
       this.padIndex = null;
-      // Usa o primeiro controle em que alguém apertar algo.
-      pad = pads.find((p) => p.connected && (p.buttons.some((b) => b.pressed) || p.axes.some((a) => Math.abs(a) > 0.6)));
+      // Usa o primeiro controle em que alguém apertar um BOTÃO (só o analógico não vale: um controle com o direcional "viciado" travava as setas).
+      pad = pads.find((p) => p.connected && p.buttons.some((b) => b.pressed));
       if (pad) this.padIndex = pad.index;
     }
     this.analogX = 0;
     this.analogY = 0;
+    this.padAx = pad ? [pad.axes[0] || 0, pad.axes[1] || 0] : null; // diagnóstico (F3)
     if (pad) {
       const b = (i) => !!(pad.buttons[i] && pad.buttons[i].pressed);
       const ax = pad.axes[0] || 0;
@@ -142,6 +144,8 @@ class InputManager {
 
   /** Eixo horizontal -1..1 (analógico se houver, senão digital). */
   axisX() {
+    const k = (this.keys.has('ArrowRight') || this.keys.has('KeyD') ? 1 : 0) - (this.keys.has('ArrowLeft') || this.keys.has('KeyA') ? 1 : 0);
+    if (k && !this.textMode) return k; // teclado tem prioridade sobre o analógico
     if (this.analogX) return this.analogX;
     return (this.cur.right ? 1 : 0) - (this.cur.left ? 1 : 0);
   }

@@ -85,7 +85,8 @@ setInterval(() => {
   if (!fpsOn) return;
   const mem = performance.memory ? ` · ${Math.round(performance.memory.usedJSHeapSize / 1048576)} MB` : '';
   const cena = game.scene.getScenes(true)[0];
-  fpsEl.textContent = `${Math.round(game.loop.actualFps)} FPS${mem} · ${cena ? cena.scene.key : '-'}`;
+  const dg = ` · tecla: ${input.lastCode || '-'} · controle: ${input.padAx ? input.padAx.map((v) => v.toFixed(2)).join('/') : 'não'}`;
+  fpsEl.textContent = `${Math.round(game.loop.actualFps)} FPS${mem} · ${cena ? cena.scene.key : '-'}${dg}`;
 }, 500);
 
 // ---- Erros: nunca tela branca ----
