@@ -1,39 +1,69 @@
-// Pares do "Pode Misturar?". Ainda NÃO validados com as FDS (ver PENDENCIAS.md): a equipe precisa conferir CADA item contra as FDS
-// antes da feira. Para trocar pelas regras do simulador do app, use: python scripts/importar_misturas.py
+// Pares do "Pode Misturar?".
 //
-// A ORDEM importa: os primeiros pares entram no começo do jogo (mais fáceis); os demais vão liberando por nível.
-// cor = nome de uma cor do theme.js; forma = 'bottle' (padrão) ou 'jar'.
+// ATENÇÃO (segurança química): TODOS os pares abaixo ainda estão com `validar: true`, isto é, a equipe precisa
+// conferir CADA um contra as FDS antes da feira (ver PENDENCIAS.md). Depois de conferido, troque para `validar: false`.
+// Se quiser que só pares conferidos apareçam no jogo, ponha SOMENTE_VALIDADOS = true.
+// Para trocar tudo pelas regras do simulador do app: python scripts/importar_misturas.py dados/misturas.csv
+//
+// A ORDEM importa: os primeiros pares entram no começo do jogo; os demais vão sendo liberados por nível.
+// A lista alterna seguro/perigoso (12 de cada) e há perigosos SEM água sanitária e seguros com produtos parecidos,
+// para não existir "atalho" do tipo "tem água sanitária = perigoso".
+//
+// cor  = nome de uma cor do theme.js ou um hex (#RRGGBB).
+// forma = silhueta do frasco: galao, spray, frasco, garrafa, pote, squeeze, caixa, barra, copo, limao, lata.
+
+export const SOMENTE_VALIDADOS = false;
 
 export const PRODUTOS = {
-  sanitaria: { nome: 'Água sanitária', cor: 'cyanLight' },
-  vinagre: { nome: 'Vinagre', cor: 'mint1' },
-  amoniaco: { nome: 'Amoníaco', cor: 'mint3' },
-  limpavidros: { nome: 'Limpa-vidros com amônia', cor: 'mint2' },
-  alcool: { nome: 'Álcool', cor: 'sky' },
-  removedor: { nome: 'Removedor ácido (limpa-pedra)', cor: 'greenDark' },
-  oxigenada: { nome: 'Água oxigenada', cor: 'sky2' },
-  limao: { nome: 'Suco de limão', cor: 'success2' },
-  detergente: { nome: 'Detergente neutro', cor: 'cyan' },
-  bicarbonato: { nome: 'Bicarbonato de sódio', cor: 'white', forma: 'jar' },
-  sabaococo: { nome: 'Sabão de coco', cor: 'cyanDark', forma: 'jar' },
-  desentupidor: { nome: 'Desentupidor (soda cáustica)', cor: 'teal1' },
+  sanitaria: { nome: 'Água sanitária', cor: 'cyanLight', forma: 'galao' },
+  vinagre: { nome: 'Vinagre', cor: 'mint1', forma: 'garrafa' },
+  amoniaco: { nome: 'Amoníaco', cor: 'mint3', forma: 'frasco' },
+  limpavidros: { nome: 'Limpa-vidros com amônia', cor: 'sky', forma: 'spray' },
+  alcool: { nome: 'Álcool', cor: 'mint2', forma: 'garrafa' },
+  removedor: { nome: 'Removedor ácido (limpa-pedra)', cor: 'greenDark', forma: 'galao' },
+  oxigenada: { nome: 'Água oxigenada', cor: '#8B5A2B', forma: 'frasco' },
+  limao: { nome: 'Suco de limão', cor: '#E8DE5A', forma: 'limao' },
+  detergente: { nome: 'Detergente neutro', cor: 'cyan', forma: 'squeeze' },
+  bicarbonato: { nome: 'Bicarbonato de sódio', cor: 'white', forma: 'pote' },
+  sabaococo: { nome: 'Sabão de coco', cor: '#EFE6CE', forma: 'barra' },
+  desentupidor: { nome: 'Desentupidor (soda cáustica)', cor: 'teal1', forma: 'lata' },
+  desinfetante: { nome: 'Desinfetante', cor: 'success2', forma: 'garrafa' },
+  sabaoempo: { nome: 'Sabão em pó', cor: 'sky2', forma: 'caixa' },
+  agua: { nome: 'Água', cor: 'cyanLight', forma: 'copo' },
 };
 
 const F = 'FDS';
+const OK = 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.';
+const DIL = 'Diluir em água é o uso normal. Siga a dose do rótulo.';
+// validar: true = ainda não conferido com a FDS (não aparece para o jogador; só nesta lista e no admin)
+const par = (a, b, perigosa, porque) => ({ a, b, perigosa, porque, fonte: F, validar: true });
 
-export const MISTURAS = [
-  { a: 'sanitaria', b: 'vinagre', perigosa: true, porque: 'Libera gás cloro, que é tóxico e irrita olhos e pulmões.', fonte: F },
-  { a: 'detergente', b: 'bicarbonato', perigosa: false, porque: 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.', fonte: F },
-  { a: 'sanitaria', b: 'amoniaco', perigosa: true, porque: 'Forma gases tóxicos (cloraminas) que atacam as vias respiratórias.', fonte: F },
-  { a: 'detergente', b: 'vinagre', perigosa: false, porque: 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.', fonte: F },
-  { a: 'sanitaria', b: 'alcool', perigosa: true, porque: 'Gera subprodutos tóxicos. Nunca misture água sanitária com álcool.', fonte: F },
-  { a: 'sabaococo', b: 'bicarbonato', perigosa: false, porque: 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.', fonte: F },
-  { a: 'sanitaria', b: 'removedor', perigosa: true, porque: 'Libera gás cloro. É uma das misturas mais perigosas da casa.', fonte: F },
-  { a: 'detergente', b: 'alcool', perigosa: false, porque: 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.', fonte: F },
-  { a: 'oxigenada', b: 'vinagre', perigosa: true, porque: 'Forma um ácido corrosivo que irrita pele, olhos e pulmões.', fonte: F },
-  { a: 'sanitaria', b: 'limpavidros', perigosa: true, porque: 'O limpa-vidros com amônia forma gases tóxicos com a água sanitária.', fonte: F },
-  { a: 'detergente', b: 'sabaococo', perigosa: false, porque: 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.', fonte: F },
-  { a: 'sanitaria', b: 'limao', perigosa: true, porque: 'O ácido do limão faz a água sanitária liberar gás cloro.', fonte: F },
-  { a: 'bicarbonato', b: 'oxigenada', perigosa: false, porque: 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.', fonte: F },
-  { a: 'desentupidor', b: 'removedor', perigosa: true, porque: 'A reação é forte, esquenta e pode espirrar produto na pele e nos olhos.', fonte: F },
+export const MISTURAS_TODAS = [
+  par('detergente', 'bicarbonato', false, OK),
+  par('sanitaria', 'vinagre', true, 'Libera gás cloro, que é tóxico e irrita olhos e pulmões.'),
+  par('detergente', 'vinagre', false, OK),
+  par('oxigenada', 'vinagre', true, 'Forma um ácido corrosivo que irrita pele, olhos e pulmões.'),
+  par('sanitaria', 'agua', false, DIL),
+  par('sanitaria', 'amoniaco', true, 'Forma gases tóxicos (cloraminas) que atacam as vias respiratórias.'),
+  par('sabaococo', 'bicarbonato', false, OK),
+  par('desentupidor', 'removedor', true, 'A reação é forte, esquenta e pode espirrar produto na pele e nos olhos.'),
+  par('vinagre', 'bicarbonato', false, 'Faz espuma, mas não solta gás perigoso. Nunca feche numa garrafa: pode estourar.'),
+  par('sanitaria', 'alcool', true, 'Gera subprodutos tóxicos. Nunca misture água sanitária com álcool.'),
+  par('detergente', 'alcool', false, OK),
+  par('amoniaco', 'removedor', true, 'Solta uma fumaça branca irritante, que ataca olhos e pulmões.'),
+  par('bicarbonato', 'oxigenada', false, OK),
+  par('sanitaria', 'limpavidros', true, 'O limpa-vidros com amônia forma gases tóxicos com a água sanitária.'),
+  par('amoniaco', 'agua', false, DIL),
+  par('sanitaria', 'removedor', true, 'Libera gás cloro. É uma das misturas mais perigosas da casa.'),
+  par('limpavidros', 'alcool', false, OK),
+  par('desentupidor', 'vinagre', true, 'A reação esquenta e pode espirrar produto cáustico na pele e nos olhos.'),
+  par('oxigenada', 'agua', false, DIL),
+  par('sanitaria', 'limao', true, 'O ácido do limão faz a água sanitária liberar gás cloro.'),
+  par('detergente', 'sabaococo', false, OK),
+  par('limpavidros', 'removedor', true, 'Solta uma fumaça branca irritante, que ataca olhos e pulmões.'),
+  par('sabaoempo', 'bicarbonato', false, OK),
+  par('sanitaria', 'desinfetante', true, 'Misturar água sanitária com outro desinfetante pode soltar gases tóxicos.'),
 ];
+
+/** Pares que o jogador pode ver. Nunca entra par com produto desconhecido. */
+export const MISTURAS = MISTURAS_TODAS.filter((m) => PRODUTOS[m.a] && PRODUTOS[m.b] && (!SOMENTE_VALIDADOS || !m.validar));

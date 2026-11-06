@@ -50,6 +50,8 @@ export default class MixGame extends BaseScene {
     this.paused = false;
     this.locked = true; // true enquanto mostra o feedback / antes de começar
     this.bag = [];
+    this.recent = []; // últimos pares mostrados (para não repetir logo em seguida)
+    this.poolSize = 0;
     this.lastPair = null;
     this.round = null;
     this.wrong = [];
@@ -139,13 +141,27 @@ export default class MixGame extends BaseScene {
   }
 
   // ---------- Rodadas ----------
+  // "Sacola" embaralhada: todos os pares liberados saem uma vez antes de repetir, e nunca um dos últimos 6.
   pickPair(unlocked) {
-    if (!this.bag.length) {
-      const pool = MISTURAS.slice(0, Math.min(unlocked, MISTURAS.length));
-      this.bag = Phaser.Utils.Array.Shuffle([...pool]);
-      if (this.bag.length > 1 && this.bag[this.bag.length - 1] === this.lastPair) this.bag.reverse();
+    const pool = MISTURAS.slice(0, Math.min(unlocked, MISTURAS.length));
+    if (pool.length > this.poolSize) {
+      // subiu de nível: os pares novos entram já na sacola atual
+      const novos = pool.slice(this.poolSize).filter((p) => !this.bag.includes(p));
+      this.bag = Phaser.Utils.Array.Shuffle([...this.bag, ...novos]);
+      this.poolSize = pool.length;
     }
-    const pair = this.bag.pop();
+    if (!this.bag.length) this.bag = Phaser.Utils.Array.Shuffle([...pool]);
+    const memoria = Math.min(6, Math.max(0, pool.length - 2));
+    let idx = this.bag.length - 1;
+    for (let i = this.bag.length - 1; i >= 0; i--) {
+      if (!this.recent.includes(this.bag[i])) {
+        idx = i;
+        break;
+      }
+    }
+    const [pair] = this.bag.splice(idx, 1);
+    this.recent.push(pair);
+    if (this.recent.length > memoria) this.recent.shift();
     this.lastPair = pair;
     return pair;
   }
