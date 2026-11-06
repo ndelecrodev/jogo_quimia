@@ -13,6 +13,6 @@ O jogo roda sem estes itens (usa arte desenhada em código). Quando os arquivos 
 | Vapor tóxico simpático | Nuvem coral com olhinhos | PNG ~190×130, 1 a 3 variações |
 | Bolhinhas coletáveis e vidas | Bolha vetorial | PNG ~96×96 (dá para usar as bolhinhas da folha) |
 | Tampinha-foguete e escudo-FDS | Ícones vetoriais | PNG ~96×96 |
-| Logo Quimia na atração | Só texto "QUIMIA ARCADE" | SVG/PNG do logo (existe `logo quimia.svg` na pasta de Downloads) |
+| Logo Quimia na atração | Só texto "QUIMIA ARCADE" (o favicon já usa o símbolo da Quimia) | SVG do símbolo ou logo completo |
 | Sons e música | Sintetizados em WebAudio | Opcional: arquivos curtos `.ogg` |
 | Pose da Kemi comemorando (campeão) | Usa `kemi_happy` | PNG novo |
