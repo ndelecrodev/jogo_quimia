@@ -57,15 +57,31 @@ describe('Kemi Sobe: prateleiras sempre alcançáveis', () => {
 });
 
 describe('Pode Misturar?: tempo para decidir', () => {
-  it('vai de 3,0 s a 1,0 s e libera mais pares por nível, sem passar do total', () => {
+  it('vai de 3,0 s a no mínimo 1,8 s e libera mais pares por nível, sem passar do total', () => {
     expect(MIX_LEVELS[0].timeMs).toBe(3000);
-    expect(MIX_LEVELS[MIX_LEVELS.length - 1].timeMs).toBe(1000);
+    expect(MIX_LEVELS[MIX_LEVELS.length - 1].timeMs).toBe(1800);
     for (let i = 1; i < MIX_LEVELS.length; i++) {
       expect(MIX_LEVELS[i].timeMs).toBeLessThan(MIX_LEVELS[i - 1].timeMs);
       expect(MIX_LEVELS[i].unlocked).toBeGreaterThanOrEqual(MIX_LEVELS[i - 1].unlocked);
     }
     expect(mixParams(0, 0)).toMatchObject(MIX_LEVELS[0]);
-    expect(mixParams(9999, 0).timeMs).toBe(1000);
+    expect(mixParams(9999, 0).timeMs).toBe(1800);
+  });
+
+  it('só começa a acelerar depois de 10 acertos', () => {
+    expect(mixParams(9, 0).timeMs).toBe(3000);
+    expect(mixParams(10, 0).timeMs).toBe(2800);
+    expect(mixParams(15, 0).timeMs).toBe(2600);
+  });
+});
+
+describe('limites para o público geral (rodada de QA)', () => {
+  it('Kemi Bolha: velocidade até 380 e vão mínimo 240; Runner: velocidade até 800', () => {
+    expect(Math.max(...BUBBLE_LEVELS.map((l) => l.speed))).toBeLessThanOrEqual(380);
+    expect(Math.min(...BUBBLE_LEVELS.map((l) => l.gap))).toBeGreaterThanOrEqual(240);
+    expect(Math.max(...RUNNER_LEVELS.map((l) => l.speed))).toBeLessThanOrEqual(800);
+    expect(bubbleParams(5, 0).level).toBe(0);
+    expect(bubbleParams(6, 0).level).toBe(1); // nível a cada 6 pontos
   });
 });
 

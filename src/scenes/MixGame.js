@@ -41,6 +41,7 @@ export default class MixGame extends BaseScene {
     // Estado
     this.points = 0;
     this.lives = LIVES;
+    this.correct = 0; // acertos (é o que define o nível)
     this.answers = 0; // respostas dadas pelo jogador (tempo esgotado não conta)
     this.elapsed = 0;
     this.streak = 0;
@@ -168,7 +169,7 @@ export default class MixGame extends BaseScene {
 
   nextRound() {
     this.items.forEach((o) => o.destroy());
-    const p = mixParams(this.points, this.elapsed, this.maxTime);
+    const p = mixParams(this.correct, this.elapsed, this.maxTime);
     const pair = this.pickPair(p.unlocked);
     const swap = Math.random() < 0.5;
     const idL = swap ? pair.b : pair.a;
@@ -193,6 +194,7 @@ export default class MixGame extends BaseScene {
     const [l, r] = this.items;
 
     if (correct) {
+      this.correct++;
       this.streak++;
       const mult = Math.min(5, 1 + Math.floor(this.streak / 3));
       this.points += mult;
@@ -231,7 +233,7 @@ export default class MixGame extends BaseScene {
     this.kemi.setTexture(kemiKey(this));
     this.plus.setFontSize('150px');
     if (this.lives <= 0) return this.finish('lives');
-    const lvl = mixParams(this.points, this.elapsed, this.maxTime).level;
+    const lvl = mixParams(this.correct, this.elapsed, this.maxTime).level;
     if (lvl > this.level) {
       this.level = lvl;
       sfx.play('level');

@@ -11,7 +11,8 @@ import { sobeParams, SOBE_PHYSICS } from '../config/difficulty.js';
 const KR = 40; // raio da Kemi
 const SCROLL_Y = 420; // quando a Kemi passa daqui, o mundo desce
 const PLAT_H = 28;
-const INVULN_MS = 1500;
+const INVULN_MS = 2000; // também vale ao começar e ao renascer
+const STUCK_MS = 6000; // sem subir por tanto tempo: aparece uma prateleira de ajuda
 const BOOST_MS = 1000;
 const BOOST_VY = -1900;
 const { gravity: G, bounce: BOUNCE, speedX: SPEED_X } = SOBE_PHYSICS;
@@ -44,6 +45,8 @@ export default class SobeGame extends BaseScene {
     this.boost = 0;
     this.shield = false;
     this.invUntil = 0;
+    this.bestHeight = 0;
+    this.lastClimb = 0;
     this.started = false;
     this.ended = false;
     this.paused = false;
@@ -211,6 +214,7 @@ export default class SobeGame extends BaseScene {
       if (this.ready() && (input.pressed('action') || input.pressed('left') || input.pressed('right'))) {
         this.started = true;
         this.startHint.destroy();
+        this.invUntil = INVULN_MS; // começa protegida
         this.vy = -BOUNCE;
         sfx.play('flap');
       }
@@ -261,6 +265,15 @@ export default class SobeGame extends BaseScene {
         this.points = pts;
         this.scoreText.setText(String(pts));
       }
+    }
+
+    // Nunca fica presa: sem subir por STUCK_MS, aparece uma prateleira larga acima dela
+    if (this.height > this.bestHeight + 5) {
+      this.bestHeight = this.height;
+      this.lastClimb = this.elapsed;
+    } else if (this.elapsed - this.lastClimb > STUCK_MS) {
+      this.addPlatform(Phaser.Math.Clamp(this.kemi.x, 200, W - 200), Math.max(120, this.kemi.y - 210), 'plat_n', 300);
+      this.lastClimb = this.elapsed;
     }
 
     const inv = this.elapsed < this.invUntil;

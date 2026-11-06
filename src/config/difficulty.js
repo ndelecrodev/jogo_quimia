@@ -2,44 +2,37 @@
 import { MAX_TIME_MS } from './game.js';
 
 // Quantos pontos para subir 1 nível, por jogo.
-export const PONTOS_POR_NIVEL = { bolha: 4, misturar: 5, sobe: 200, runner: 160 };
+export const PONTOS_POR_NIVEL = { bolha: 6, sobe: 200, runner: 160 }; // (Pode Misturar? sobe por acertos: ver MIX_* abaixo)
 
 // "par" de cada jogo: pontuação Quimia = round(pontos / par * 1000). (calibrar no admin com partidas reais)
 export const PARS = { bolha: 30, misturar: 40, sobe: 1200, runner: 1000 };
 
-// Kemi Bolha — um item por nível (o último se repete). Resolução 1080p:
-// o vão vai de 300 a 210 px (equivale a ~190→130 do prompt, escalado para a tela grande).
+// Kemi Bolha — um item por nível (o último se repete). 1080p: vão de 300 a 240 px, velocidade de 250 a 380 px/s.
+// Nível a cada 6 pontos. (Rodada de QA: antes chegava a 450 px/s e vão 210; era demais para o público geral.)
 export const BUBBLE_LEVELS = [
   { gap: 300, speed: 250, maxDelta: 120, spacing: 580 },
-  { gap: 285, speed: 275, maxDelta: 150, spacing: 570 },
-  { gap: 270, speed: 300, maxDelta: 180, spacing: 560 },
-  { gap: 255, speed: 325, maxDelta: 200, spacing: 550 },
-  { gap: 240, speed: 350, maxDelta: 220, spacing: 540 },
-  { gap: 228, speed: 375, maxDelta: 240, spacing: 530 },
-  { gap: 218, speed: 400, maxDelta: 250, spacing: 520 },
-  { gap: 210, speed: 420, maxDelta: 260, spacing: 520 },
-  // Do nível 8 em diante (a partir de ~32 pontos) o jogo fica bem mais rápido e apertado.
-  // O tempo entre frascos (spacing/speed) fica ~1 s para a variação de altura continuar alcançável.
-  { gap: 200, speed: 450, maxDelta: 250, spacing: 520 },
-  { gap: 194, speed: 480, maxDelta: 250, spacing: 520 },
-  { gap: 188, speed: 510, maxDelta: 245, spacing: 530 },
-  { gap: 182, speed: 540, maxDelta: 240, spacing: 560 },
-  { gap: 176, speed: 570, maxDelta: 235, spacing: 590 },
-  { gap: 170, speed: 600, maxDelta: 230, spacing: 620 },
-  { gap: 165, speed: 630, maxDelta: 225, spacing: 650 },
+  { gap: 288, speed: 270, maxDelta: 140, spacing: 575 },
+  { gap: 276, speed: 290, maxDelta: 160, spacing: 570 },
+  { gap: 266, speed: 310, maxDelta: 175, spacing: 565 },
+  { gap: 256, speed: 330, maxDelta: 190, spacing: 560 },
+  { gap: 248, speed: 350, maxDelta: 200, spacing: 555 },
+  { gap: 242, speed: 365, maxDelta: 210, spacing: 550 },
+  { gap: 240, speed: 380, maxDelta: 220, spacing: 550 },
 ];
 
-// Pode Misturar? — tempo para decidir (3,0 s → 1,0 s) e quantos pares da lista já entraram, por nível.
+// Pode Misturar? — tempo para decidir (3,0 s → 1,8 s) e quantos pares da lista já entraram.
+// Só começa a acelerar depois de MIX_PRIMEIRO_DEGRAU acertos; depois, 1 degrau a cada MIX_ACERTOS_POR_NIVEL acertos.
+// (Rodada de QA: 1,4 s com dois rótulos para ler era demais para o público geral.)
+export const MIX_PRIMEIRO_DEGRAU = 10;
+export const MIX_ACERTOS_POR_NIVEL = 5;
 export const MIX_LEVELS = [
-  { timeMs: 3000, unlocked: 6 },
-  { timeMs: 2700, unlocked: 8 },
-  { timeMs: 2400, unlocked: 10 },
-  { timeMs: 2100, unlocked: 12 },
-  { timeMs: 1850, unlocked: 14 },
-  { timeMs: 1600, unlocked: 14 },
-  { timeMs: 1400, unlocked: 14 },
-  { timeMs: 1200, unlocked: 14 },
-  { timeMs: 1000, unlocked: 14 },
+  { timeMs: 3000, unlocked: 10 },
+  { timeMs: 2800, unlocked: 12 },
+  { timeMs: 2600, unlocked: 14 },
+  { timeMs: 2400, unlocked: 16 },
+  { timeMs: 2200, unlocked: 18 },
+  { timeMs: 2000, unlocked: 20 },
+  { timeMs: 1800, unlocked: 24 },
 ];
 
 // Kemi Sobe — física do quique e tabela por nível. Pontos = altura / 10.
@@ -70,15 +63,15 @@ export const RUNNER_OBSTACLES = { low: 110, tall: 180, bottleW: 70, tallW: 78, c
 export const RUNNER_CLUSTER_SPAN = RUNNER_OBSTACLES.bottleW * 2 + RUNNER_OBSTACLES.clusterGap;
 export const RUNNER_LEVELS = [
   { speed: 520, tall: 0, vapor: 0, cluster: 0, gapMin: 1.35, gapMax: 1.9 },
-  { speed: 560, tall: 0.25, vapor: 0, cluster: 0, gapMin: 1.3, gapMax: 1.8 },
-  { speed: 600, tall: 0.3, vapor: 0.2, cluster: 0, gapMin: 1.25, gapMax: 1.7 },
-  { speed: 640, tall: 0.3, vapor: 0.25, cluster: 0, gapMin: 1.2, gapMax: 1.65 },
-  { speed: 690, tall: 0.3, vapor: 0.3, cluster: 0.15, gapMin: 1.15, gapMax: 1.6 },
-  { speed: 740, tall: 0.35, vapor: 0.3, cluster: 0.2, gapMin: 1.1, gapMax: 1.55 },
-  { speed: 790, tall: 0.35, vapor: 0.35, cluster: 0.25, gapMin: 1.1, gapMax: 1.5 },
-  { speed: 840, tall: 0.4, vapor: 0.35, cluster: 0.25, gapMin: 1.05, gapMax: 1.45 },
-  { speed: 890, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
-  { speed: 940, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
+  { speed: 550, tall: 0.25, vapor: 0, cluster: 0, gapMin: 1.3, gapMax: 1.8 },
+  { speed: 580, tall: 0.3, vapor: 0.2, cluster: 0, gapMin: 1.25, gapMax: 1.7 },
+  { speed: 615, tall: 0.3, vapor: 0.25, cluster: 0, gapMin: 1.2, gapMax: 1.65 },
+  { speed: 650, tall: 0.3, vapor: 0.3, cluster: 0.15, gapMin: 1.15, gapMax: 1.6 },
+  { speed: 690, tall: 0.35, vapor: 0.3, cluster: 0.2, gapMin: 1.1, gapMax: 1.55 },
+  { speed: 725, tall: 0.35, vapor: 0.35, cluster: 0.25, gapMin: 1.1, gapMax: 1.5 },
+  { speed: 760, tall: 0.4, vapor: 0.35, cluster: 0.25, gapMin: 1.05, gapMax: 1.45 },
+  { speed: 785, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
+  { speed: 800, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
 ];
 
 export function levelFor(points, perLevel, maxLevel) {
@@ -106,9 +99,10 @@ export function sobeParams(points, elapsedMs, capMs = MAX_TIME_MS) {
   return { level, ...SOBE_LEVELS[eff] };
 }
 
-export function mixParams(points, elapsedMs, capMs = MAX_TIME_MS) {
+/** acertos = quantas respostas certas a pessoa já deu (não os pontos, que crescem com o combo). */
+export function mixParams(acertos, elapsedMs, capMs = MAX_TIME_MS) {
   const last = MIX_LEVELS.length - 1;
-  const level = levelFor(points, PONTOS_POR_NIVEL.misturar, last);
+  const level = acertos < MIX_PRIMEIRO_DEGRAU ? 0 : Math.min(last, 1 + Math.floor((acertos - MIX_PRIMEIRO_DEGRAU) / MIX_ACERTOS_POR_NIVEL));
   const eff = Math.min(last, level + pressureBonus(elapsedMs, capMs));
   return { level, ...MIX_LEVELS[eff] };
 }
