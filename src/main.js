@@ -61,7 +61,6 @@ const hud = document.getElementById('hud');
 const drawHud = () => {
   const bits = [];
   if (input.padConnected) bits.push(`🎮 ${input.padName || 'Controle'} conectado`);
-  else bits.push('🎮 Aperte qualquer botão do controle');
   if (sfx.muted) bits.push('🔇 Mudo (M)');
   hud.textContent = bits.join('   ');
 };
