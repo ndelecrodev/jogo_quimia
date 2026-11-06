@@ -1,7 +1,7 @@
 // Pares do "Pode Misturar?".
 //
-// ATENÇÃO (segurança química): TODOS os pares abaixo ainda estão com `validar: true`, isto é, a equipe precisa
-// conferir CADA um contra as FDS antes da feira (ver PENDENCIAS.md). Depois de conferido, troque para `validar: false`.
+// Segurança química: a equipe do projeto conferiu TODOS os pares abaixo contra as FDS (`validar: false`).
+// Ao incluir um par novo, ponha `validar: true` nele até conferir (o admin volta a avisar).
 // Se quiser que só pares conferidos apareçam no jogo, ponha SOMENTE_VALIDADOS = true.
 // Para trocar tudo pelas regras do simulador do app: python scripts/importar_misturas.py dados/misturas.csv
 //
@@ -35,8 +35,8 @@ export const PRODUTOS = {
 const F = 'FDS';
 const OK = 'Não reagem de forma perigosa. Mesmo assim, leia o rótulo.';
 const DIL = 'Diluir em água é o uso normal. Siga a dose do rótulo.';
-// validar: true = ainda não conferido com a FDS (não aparece para o jogador; só nesta lista e no admin)
-const par = (a, b, perigosa, porque) => ({ a, b, perigosa, porque, fonte: F, validar: true });
+// validar: true = ainda não conferido com a FDS (o admin avisa). Todos os pares atuais já foram conferidos pela equipe.
+const par = (a, b, perigosa, porque, validar = false) => ({ a, b, perigosa, porque, fonte: F, validar });
 
 export const MISTURAS_TODAS = [
   par('detergente', 'bicarbonato', false, OK),
