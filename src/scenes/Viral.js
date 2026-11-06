@@ -21,10 +21,10 @@ export default class Viral extends BaseScene {
     addBackground(this);
     this.bubbles = new BubbleField(this, 18);
 
-    T(this, 960, 100, 'Chama um amigo pra bater seu recorde!', 'h1', { color: COLORS.neon });
+    T(this, 960, 100, 'Chame um amigo para bater o seu recorde!', 'h1', { color: COLORS.neon });
     // Marcação só aparece se o Instagram/hashtag foram preenchidos (nada de texto de exemplo na tela)
     const marca = [s.instagram, s.hashtag].map((x) => String(x || '').trim()).filter(Boolean).join('  ');
-    if (marca) T(this, 960, 185, `Marca ${marca}`, 'h3', { color: COLORS.white });
+    if (marca) T(this, 960, 185, `Marque ${marca}`, 'h3', { color: COLORS.white });
 
     // Dois QR codes
     this.qrBox(560, 'PARA VOCÊ', 'Em breve: entre na lista de espera', s.urlUser);
@@ -34,7 +34,7 @@ export default class Viral extends BaseScene {
     // Progresso
     const bar = this.add.rectangle(560, 1010, 0, 12, hex(COLORS.neon)).setOrigin(0, 0.5);
     this.tweens.add({ targets: bar, width: 800, duration: DURATION, onComplete: () => this.go() });
-    T(this, 960, 1050, 'Aperte ação para pular', 'caption', { color: COLORS.sky2 });
+    T(this, 960, 1050, 'Aperte ESPAÇO ou ✕ para pular', 'caption', { color: COLORS.sky2 });
     this.gone = false;
   }
 

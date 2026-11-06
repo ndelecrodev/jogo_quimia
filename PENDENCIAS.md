@@ -18,6 +18,10 @@ O que a equipe precisa preencher ou conferir, e **onde** mudar cada coisa. O pai
 
 Links de QR de exemplo (`example`), de `localhost` ou sem `https://` são recusados no admin.
 
+## 1b. Conferir o texto de consentimento (LGPD)
+
+A tela de contato **não tem mais caixa de aceite**, por pedido do projeto. O texto fixo diz: "Ao tocar em SALVAR, você aceita que a Quimia use este contato apenas para falar sobre o brinde e as novidades do projeto. Para excluir, fale com a equipe." O `consent = true` (com `consentText` e `consentAt`) só é gravado quando a pessoa aperta SALVAR; "Agora não" nunca grava contato. **Quem implementou não é advogado:** peça a quem orienta o projeto para conferir esse texto antes da feira (ele está em `src/scenes/Contact.js`, constante `LGPD`; ao mudar, suba `CONSENT_TEXT_VERSION`).
+
 ## 2. Conferir (segurança química)
 
 - **Lista do Pode Misturar?** (`src/config/misturas.js`): os **24 pares** estão com `validar: true`, isto é, **ainda não conferidos com as FDS**. A equipe precisa revisar cada um e trocar para `validar: false`.

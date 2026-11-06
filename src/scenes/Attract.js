@@ -1,6 +1,7 @@
 import { BaseScene } from './BaseScene.js';
 import { COLORS, hex } from '../theme.js';
 import { addBackground, BubbleField, T, drawCard, drawQR, kemiKey, fitImage, reduceFx } from '../ui.js';
+import { fmtNum } from '../core/format.js';
 import { isRealUrl } from '../core/pendencias.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
@@ -133,7 +134,7 @@ export default class Attract extends BaseScene {
       this.panel.add(g);
       this.panel.add(T(this, -310, y, `${i + 1}`, 'h2', { color: i === 0 ? COLORS.neon : COLORS.cyan, origin: [0, 0.5] }));
       this.panel.add(T(this, -230, y, p.nick, 'h3', { origin: [0, 0.5] }));
-      this.panel.add(T(this, 320, y, `${isGeneral ? p.quimia : p.points}`, 'h3', { color: COLORS.neon, origin: [1, 0.5] }));
+      this.panel.add(T(this, 320, y, fmtNum(isGeneral ? p.quimia : p.points), 'h3', { color: COLORS.neon, origin: [1, 0.5] }));
     });
   }
 

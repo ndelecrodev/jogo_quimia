@@ -46,6 +46,7 @@ class Sfx {
       case 'flap': this.tone(420, 0.12, { type: 'sine', vol: 0.18, slide: 380 }); break;
       case 'point': this.tone(784, 0.09, { type: 'triangle', vol: 0.18 }); this.tone(1175, 0.12, { type: 'triangle', vol: 0.16, delay: 0.06 }); break;
       case 'bonus': [880, 1100, 1320].forEach((f, i) => this.tone(f, 0.1, { type: 'sine', vol: 0.15, delay: i * 0.05 })); break;
+      case 'pop': this.tone(620, 0.09, { type: 'sine', vol: 0.2, slide: -380 }); this.tone(300, 0.12, { type: 'triangle', vol: 0.14, delay: 0.05, slide: -120 }); break;
       case 'hit': this.tone(180, 0.28, { type: 'sawtooth', vol: 0.2, slide: -110 }); break;
       case 'level': [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.12, { type: 'triangle', vol: 0.17, delay: i * 0.07 })); break;
       case 'end': [523, 440, 349, 262].forEach((f, i) => this.tone(f, 0.18, { type: 'triangle', vol: 0.17, delay: i * 0.12 })); break;

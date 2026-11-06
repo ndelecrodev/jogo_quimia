@@ -19,7 +19,7 @@ export default class DummyGame extends BaseScene {
     addBackground(this);
     this.bubbles = new BubbleField(this, 14);
     T(this, 960, 120, gameById(this.gameId).name, 'h1', { color: COLORS.neon });
-    T(this, 960, 200, 'EM CONSTRUÇÃO — aperte ação para pontuar!', 'h3', { color: COLORS.cyan });
+    T(this, 960, 200, 'EM CONSTRUÇÃO — aperte ESPAÇO ou ✕ para pontuar!', 'h3', { color: COLORS.cyan });
     this.kemi = fitImage(this.add.image(960, 540, kemiKey(this)), 320);
     this.score = T(this, 960, 800, '0', 'display');
     this.timer = T(this, 960, 900, '10', 'h2', { color: COLORS.mint2 });

@@ -1,8 +1,8 @@
 // Painel admin oculto (Ctrl+Shift+A + PIN). Para a equipe do stand: conferir código de resgate,
 // marcar brinde entregue, exportar/importar dados, calibrar metas, zerar para abrir a feira e ajustar o evento.
-import { getPlays, getSettings, setSettings, updatePlay, deletePlay, replacePlays, clearAllPlays, readOutbox, writeOutbox } from '../core/Storage.js';
+import { getPlays, getSettings, setSettings, defaultSettings, restoreScoringDefaults, updatePlay, deletePlay, replacePlays, clearAllPlays, readOutbox, writeOutbox } from '../core/Storage.js';
 import { Cloud } from '../core/Cloud.js';
-import { rankGeneral, dayKey, minRank } from '../core/Ranking.js';
+import { rankGeneral, dayKey, minRank, quimiaOf } from '../core/Ranking.js';
 import { GAMES, gameById } from '../config/games.js';
 import { sfx } from '../core/Sfx.js';
 import { isRealUrl, listarPendencias, hasPin } from '../core/pendencias.js';
@@ -145,8 +145,13 @@ const num = (v) => (v == null ? '—' : String(Math.round(v)));
 // ---------- Tela principal ----------
 function renderMain() {
   const s = getSettings();
+  const dflt = defaultSettings();
+  const tag = (custom) => `<span class="tag" style="background:${custom ? '#FF7A7A;color:#1E2222' : '#0AA074'}">${custom ? 'personalizado' : 'padrão'}</span>`;
   const gameFields = (key, label, valor) =>
-    GAMES.map((g) => `<label>${label} — ${esc(g.name)}<input type="number" min="1" id="${key}_${g.id}" value="${valor(g)}"></label>`).join('');
+    GAMES.map((g) => {
+      const custom = key === 'minRank' ? Number(s.minRank && s.minRank[g.id]) > 0 : Number(s[key][g.id]) !== Number(dflt[key][g.id]);
+      return `<label>${label} — ${esc(g.name)} ${tag(custom)}<input type="number" min="1" id="${key}_${g.id}" value="${valor(g)}"></label>`;
+    }).join('');
   root.innerHTML = `
     <div class="bar"><h1>Painel Admin Quimia</h1><button class="sec" data-act="close">Fechar (Esc)</button></div>
     <div id="pend"></div>
@@ -187,7 +192,7 @@ function renderMain() {
         <label>Brinde de participação<input type="text" id="prize_participacao" value="${esc(s.prizes.participacao)}"></label>
         <label>Brinde da meta<input type="text" id="prize_meta" value="${esc(s.prizes.meta)}"></label>
         <label>Prêmio Master<input type="text" id="prize_master" value="${esc(s.prizes.master)}"></label>
-        <label>Tentativas oficiais por apelido<input type="number" min="1" id="maxAttempts" value="${s.maxAttempts}"></label>
+        <label>Tentativas oficiais por apelido ${tag(Number(s.maxAttempts) !== Number(dflt.maxAttempts))} (padrão ${dflt.maxAttempts})<input type="number" min="1" id="maxAttempts" value="${s.maxAttempts}"></label>
         <label>Tempo máximo por partida (segundos)<input type="number" min="30" id="maxTimeSec" value="${Math.round(s.maxTimeMs / 1000)}"></label>
         <label>Hora do campeão (HH:MM, vazio = sem contagem)<input type="text" id="eventEnd" value="${esc(s.eventEnd)}"></label>
         <label>Instagram (ex.: @quimia.app)<input type="text" id="instagram" value="${esc(s.instagram)}"></label>
@@ -203,7 +208,7 @@ function renderMain() {
         <label class="chk"><input type="checkbox" id="muted" ${s.muted ? 'checked' : ''}> Som mutado</label>
         <label class="chk"><input type="checkbox" id="reduceFlash" ${s.reduceFlash ? 'checked' : ''}> Reduzir efeitos de piscar</label>
       </div>
-      <p><button data-act="save">Salvar configurações</button> <span class="err" id="saveMsg"></span></p>
+      <p><button data-act="save">Salvar configurações</button> <button class="sec" data-act="restore-scoring">Restaurar padrões de pontuação</button> <span class="err" id="saveMsg"></span></p>
       <p style="color:#54A8B1">As mudanças valem a partir da próxima tela/partida. Se link, Instagram, hashtag ou hora ficarem vazios, o jogo não mostra o item (os QR viram "Em breve").</p>
     </div>`;
   renderPend();
@@ -233,7 +238,7 @@ function renderStats() {
   const official = plays.filter((p) => p.official);
   const withCode = official.filter((p) => p.code);
   const delivered = withCode.filter((p) => p.delivered).length;
-  const leader = rankGeneral(plays)[0];
+  const leader = rankGeneral(plays, { pars: s.pars })[0];
   root.querySelector('#stats').innerHTML = `
     <div class="stat"><b>${plays.length}</b>partidas</div>
     <div class="stat"><b>${official.length}</b>oficiais</div>
@@ -273,7 +278,7 @@ function renderTable() {
   const rows = list.slice(0, 300).map(
     (p) => `<tr class="${p.official ? 'ok' : 'train'}">
       <td>${esc(fmtDate(p.ts))}</td><td>${esc(p.nick)}${p.official && p.code ? (p.delivered ? ' <span class="tag" style="background:#0AA074">entregue ✓</span>' : ' <span class="tag" style="background:#FF7A7A;color:#1E2222">brinde pendente</span>') : ''}</td><td>${esc(gameName(p.game))}</td>
-      <td>${p.points}</td><td>${p.quimia}</td><td><b>${esc(p.code || '—')}</b></td><td>${playPrizes(p, s)}</td>
+      <td>${p.points}</td><td>${quimiaOf(p, s.pars)}</td><td><b>${esc(p.code || '—')}</b></td><td>${playPrizes(p, s)}</td>
       <td>${p.official && p.code ? `<button class="small ${p.delivered ? 'sec' : ''}" data-act="deliver" data-id="${esc(p.id)}">${p.delivered ? 'Entregue ✓' : 'Marcar entregue'}</button>` : '—'}</td>
       <td>${p.contact ? `${esc(p.contact)}${p.company ? '<span class="tag">empresa</span>' : ''}` : '—'}</td>
       <td><button class="small danger" data-act="del" data-id="${esc(p.id)}">Apagar</button></td></tr>`
@@ -340,6 +345,11 @@ function onClick(e) {
   else if (act === 'usesug') useSuggestion(b.dataset.game);
   else if (act.startsWith('cloud-')) cloudAction(act, b);
   else if (act === 'save') saveSettings();
+  else if (act === 'restore-scoring') {
+    if (!confirm('Voltar metas, mínimos, pares e tentativas aos padrões do código?')) return;
+    restoreScoringDefaults();
+    renderMain();
+  }
 }
 
 // ---------- Exportar / importar ----------

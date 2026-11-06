@@ -10,6 +10,8 @@ import { quimiaScore, positionOfNick, officialAttempts, generateCode, dayKey, mi
 import { gameById } from '../config/games.js';
 import { SHOW_VIRAL_AFTER_GAME } from '../config/game.js';
 import { FATOS } from '../config/fatos.js';
+import { SCORING_VERSION } from '../config/game.js';
+import { fmtNum } from '../core/format.js';
 
 // Fim de partida: pontos, posições, brinde (SEM código na tela: o código fica gravado e visível só no admin) e "Você sabia?".
 export default class GameOver extends BaseScene {
@@ -57,6 +59,7 @@ export default class GameOver extends BaseScene {
       game,
       points,
       quimia,
+      scoringVersion: SCORING_VERSION,
       durationMs,
       ts: Date.now(),
       day: dayKey(Date.now()),
@@ -97,16 +100,16 @@ export default class GameOver extends BaseScene {
       from: 0,
       to: points,
       duration: Math.min(1400, 400 + points * 40),
-      onUpdate: (t) => scoreText.setText(String(Math.round(t.getValue()))),
+      onUpdate: (t) => scoreText.setText(fmtNum(Math.round(t.getValue()))),
     });
     if (official && !rankable) {
       T(this, 520, 505, 'Quase lá!', 'h2', { color: COLORS.cyanLight });
       T(this, 520, 580, `Para entrar no ranking: ${minR} pontos ou mais.`, 'body', { color: COLORS.white });
       T(this, 520, 630, 'Você ganhou o brinde de participação!', 'body', { color: COLORS.mint2 });
     } else if (official) {
-      T(this, 520, 490, `Pontuação Quimia: ${quimia}`, 'h3', { color: COLORS.neon });
-      T(this, 520, 565, `#${posGame} no ${g.name}`, 'h3', { color: COLORS.white });
-      T(this, 520, 625, `#${posGen} no Ranking Geral`, 'h3', { color: COLORS.mint2 });
+      T(this, 520, 490, `Pontuação Quimia: ${fmtNum(quimia)}`, 'h3', { color: COLORS.neon });
+      T(this, 520, 565, `${posGame}º lugar no ${g.name}`, 'h3', { color: COLORS.white });
+      T(this, 520, 625, `${posGen}º lugar no Ranking Geral`, 'h3', { color: COLORS.mint2 });
     } else {
       T(this, 520, 520, 'Partida de treino', 'h2', { color: COLORS.cyan });
       T(this, 520, 595, 'Você já fez a sua jogada oficial.', 'body', { color: COLORS.white });
@@ -118,14 +121,14 @@ export default class GameOver extends BaseScene {
     drawCard(right, 1000, 190, 800, 500, { stroke: official ? COLORS.neon : COLORS.elevated2, sw: official ? 5 : 3 });
     if (official) {
       const premio = prizes.includes('meta') ? settings.prizes.meta : settings.prizes.participacao; // só o maior nível
-      this.prizeIcon(1400, 270);
-      T(this, 1400, 355, 'SEU BRINDE', 'overline', { color: COLORS.sky2 });
-      T(this, 1400, 415, premio, 'h1', { color: COLORS.mint2, wordWrap: { width: 720 }, align: 'center' });
+      this.prizeIcon(1400, 262);
+      T(this, 1400, 385, 'SEU BRINDE', 'overline', { color: COLORS.sky2 });
+      T(this, 1400, 442, premio, 'h1', { color: COLORS.mint2, wordWrap: { width: 720 }, align: 'center' });
       const sizeNick = nick.length > 10 ? '84px' : nick.length > 7 ? '104px' : '124px';
-      const nickText = T(this, 1400, 520, nick, 'display', { color: COLORS.neon, fontSize: sizeNick });
+      const nickText = T(this, 1400, 545, nick, 'display', { color: COLORS.neon, fontSize: sizeNick });
       this.tweens.add({ targets: nickText, scale: 1.05, duration: 600, yoyo: true, repeat: 2 });
-      T(this, 1400, 612, 'Fale com a equipe no stand', 'bodyL', { color: COLORS.white });
-      if (posGen === 1) T(this, 1400, 662, `Você está concorrendo ao ${settings.prizes.master}`, 'bodyS', { color: COLORS.neon });
+      T(this, 1400, 625, 'Fale com a equipe no stand', 'bodyL', { color: COLORS.white });
+      if (posGen === 1) T(this, 1400, 668, `Você está concorrendo ao Prêmio Master: ${settings.prizes.master}`, 'bodyS', { color: COLORS.neon, wordWrap: { width: 740 }, align: 'center' });
     } else {
       T(this, 1400, 420, 'Sem brinde desta vez.', 'h2', { color: COLORS.white });
       T(this, 1400, 500, 'Chame o próximo jogador!', 'body', { color: COLORS.mint2 });
@@ -150,7 +153,7 @@ export default class GameOver extends BaseScene {
       T(this, 160, 770, data.game === 'misturar' ? 'VOCÊ SABIA? (E ainda acertou tudo!)' : 'VOCÊ SABIA?', 'overline', { color: COLORS.neon, origin: [0, 0.5] });
       T(this, 160, 825, fact, 'bodyL', { origin: [0, 0.5], wordWrap: { width: 1600 } });
     }
-    T(this, 960, 925, 'Quer saber mais? Pergunte pra Kemi no app Quimia (em breve).', 'caption', { color: COLORS.sky2 });
+    T(this, 960, 925, 'Quer saber mais? Pergunte para a Kemi no app Quimia (em breve).', 'caption', { color: COLORS.sky2 });
 
     // Um único botão: Continuar (→ contato, se elegível → Hub). Sem "Jogar de novo": cada pessoa joga uma vez.
     this.btns = [{ label: 'CONTINUAR', do: () => this.leave(home) }].map((b) => {
@@ -187,7 +190,7 @@ export default class GameOver extends BaseScene {
     T(this, 960, 150, 'Vamos de novo?', 'display', { color: COLORS.neon });
     fitImage(this.add.image(960, 450, kemiKey(this, 'sleepy')), 340);
     T(this, 960, 690, 'Parece que a partida nem começou de verdade.', 'h3', { color: COLORS.white });
-    T(this, 960, 760, 'Essa não gastou a sua tentativa. Bora tentar?', 'bodyL', { color: COLORS.mint2 });
+    T(this, 960, 760, 'Essa não gastou a sua jogada oficial. Vamos tentar de novo?', 'bodyL', { color: COLORS.mint2 });
     this.btns = [
       { label: 'JOGAR DE NOVO', do: () => this.scene.start(g.scene, { gameId: game }) },
       { label: solo ? 'SAIR' : 'OUTRO JOGO', do: () => this.scene.start(home) },

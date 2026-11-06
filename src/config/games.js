@@ -29,7 +29,7 @@ export const GAMES = [
     pose: 'happy',
     ready: true,
     enabledByDefault: true,
-    desc: 'Quique de prateleira em prateleira.',
+    desc: 'Pule de prateleira em prateleira.',
     tip: 'Mova para os lados',
     keys: '←   →',
   },

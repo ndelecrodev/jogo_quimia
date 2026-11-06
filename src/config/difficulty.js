@@ -35,6 +35,10 @@ export const BUBBLE_LEVELS = [
   { gap: 224, speed: 430, maxDelta: 260, spacing: 520 },
 ];
 
+// Kemi Bolha: a bolha da Kemi encolhe a cada vida perdida (100% → 82% → 66%). A hitbox acompanha; o desenho nunca passa de 66%
+// (190 px x 0,66 = ~125 px de largura em 1080p: ainda bem legível).
+export const BUBBLE_SHRINK_STEPS = [1, 0.82, 0.66];
+
 // Pode Misturar? — tempo para decidir (3,0 s → 1,8 s) e quantos pares da lista já entraram.
 // Só começa a acelerar depois de MIX_PRIMEIRO_DEGRAU acertos; depois, 1 degrau a cada MIX_ACERTOS_POR_NIVEL acertos.
 // (Rodada de QA: 1,4 s com dois rótulos para ler era demais para o público geral.)

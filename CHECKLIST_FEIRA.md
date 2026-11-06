@@ -15,7 +15,7 @@ Marque cada item. Faça a parte "Véspera" com tudo montado como será no stand.
 - [ ] Partida parada (sem apertar nada) mostra "Vamos de novo?" e **não** gasta tentativa nem dá código.
 - [ ] Tela final mostra pontos, posição, o **brinde** e o **apelido grande** (sem código); não existe "Jogar de novo"; abaixo do mínimo diz "Quase lá!".
 - [ ] Depois do fim de partida (e do contato, se pedir) cai no **Hub** com "Sua jogada oficial já foi!"; 15 s sem apertar nada volta à atração e limpa o apelido; Esc/○ no Hub troca de jogador.
-- [ ] Entrou no Top 3 ou bateu a meta: aparece a tela de contato (testar o aceite LGPD e "agora não" com ○/Esc) e depois volta direto ao Hub (sem tela de QR).
+- [ ] Entrou no Top 3 ou bateu a meta: aparece a tela de contato (foco inicial na 1ª tecla, Enter salva com 5+ caracteres, SALVAR cinza antes disso, linha de consentimento visível, "agora não" com ○/Esc) e depois volta direto ao Hub (sem tela de QR).
 - [ ] **QR codes abrem a página certa** ao escanear com um celular (usuário e empresa) no painel de convite da **atração**. Se ainda não há link, aparece "Em breve".
 - [ ] Admin: `Ctrl+Shift+A`; **PIN criado** e anotado só com a equipe; buscar por **apelido** e por código; "Marcar brinde entregue"; exportar CSV; exportar JSON.
 - [ ] Admin: **nenhum alerta vermelho** de pendências (ou só os que a equipe decidiu deixar).

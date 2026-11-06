@@ -10,7 +10,11 @@ import {
   CODE_ALPHABET,
 } from '../src/core/Ranking.js';
 
-const play = (o) => ({ nick: 'A', game: 'bolha', points: 10, quimia: 333, durationMs: 50000, ts: 1, official: true, ...o });
+// A Pontuação Quimia é recalculada dos pontos e do par (300): aqui os pontos saem do "quimia" pedido, para o teste continuar legível.
+const play = (o) => {
+  const quimia = o.quimia ?? 333;
+  return { nick: 'A', game: 'bolha', points: Math.round((quimia * 300) / 1000), quimia, durationMs: 50000, ts: 1, official: true, ...o };
+};
 
 describe('quimiaScore', () => {
   it('normaliza pelo par do jogo, sem teto', () => {

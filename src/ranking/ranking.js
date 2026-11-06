@@ -4,6 +4,7 @@ import { generalRanking, gameRanking } from '../core/RankingSource.js';
 import { Cloud } from '../core/Cloud.js';
 import { championText } from '../core/clock.js';
 import { GAMES } from '../config/games.js';
+import { fmtNum } from '../core/format.js';
 
 const app = document.getElementById('app');
 app.innerHTML = `
@@ -29,7 +30,7 @@ function render() {
     ? list
         .map(
           (p, i) => `<li><span class="pos">${i + 1}</span><span class="nick">${esc(p.nick)}</span>
-            <span class="pts">${general ? p.quimia : p.points}<span class="sub">${general ? 'pts Quimia' : 'pontos'}</span></span></li>`
+            <span class="pts">${fmtNum(general ? p.quimia : p.points)}<span class="sub">${general ? 'pts Quimia' : 'pontos'}</span></span></li>`
         )
         .join('')
     : '<div class="empty">Seja o primeiro do ranking!</div>';

@@ -48,7 +48,7 @@ Se o servidor não subir, abra o Prompt de Comando na pasta e rode `python servi
 - **Cada pessoa tem 1 jogada oficial** (por apelido). Depois dela o Hub mostra "Sua jogada oficial já foi! Chame o próximo jogador"; se ninguém apertar nada por 15 s, o jogo limpa o jogador e volta à tela de atração. **Esc / ○ no Hub = trocar de jogador.** Dá para treinar, mas treino não vale ranking nem brinde.
 - **Partida parada ou abandonada** (nenhuma ação, ou 0 pontos em menos de 10 s): **não vale nada**, não gasta a jogada, sem código nem brinde. Aparece "Vamos de novo?".
 - **Jogou de verdade, mas abaixo do mínimo do jogo:** gasta a jogada oficial e ganha o **brinde de participação** (e um código interno), mas **não entra no ranking** (a tela diz quantos pontos faltam).
-- **Fez o mínimo:** entra no ranking. Se bater a **meta**, ganha também o brinde da meta. Top 3 do jogo ou meta: pedimos o contato (opcional, com aceite LGPD).
+- **Fez o mínimo:** entra no ranking. Se bater a **meta**, ganha também o brinde da meta. Top 3 do jogo ou meta: pedimos o contato (opcional; o aviso de uso do contato fica na tela e o aceite é apertar SALVAR).
 - As pontuações dos 4 jogos usam uma **escala comum** (`SCORE_SCALE` em `src/config/difficulty.js`) e o **par é 300 para todos**. Os valores (meta, mínimo, par) se ajustam no admin; o **Calibrar** sugere números com as partidas já feitas.
 - **Atenção:** a escala de pontos mudou. **Zere todas as partidas de teste** (admin > "Zerar tudo", e "Zerar TUDO na nuvem") antes de abrir, senão o ranking mistura escalas.
 - Se o admin já tinha "Tentativas oficiais" salvo com outro valor neste navegador, **confira que está 1** (Configurações).
@@ -83,7 +83,7 @@ No admin (**Ctrl + Shift + A**):
 O ranking **não soma sozinho**. No fim, exporte o JSON de cada estação e, na principal, use **Importar JSON** (ele mescla sem duplicar).
 
 ## Contatos (LGPD)
-O contato só é pedido a quem entra no Top 3 ou atinge a meta, é **opcional** (○ ou Esc = "agora não") e exige aceite. Ele aparece **só no admin e no CSV**, nunca na tela pública. Quem pedir para apagar: busque o apelido no admin e clique em **Apagar**.
+O contato só é pedido a quem entra no Top 3 ou atinge a meta, é **opcional** (○ ou Esc = "agora não", que nunca grava contato). Não há caixa de aceite: o texto de consentimento fica fixo na tela e o consentimento só é gravado (com versão do texto e hora) quando a pessoa aperta SALVAR. Ele aparece **só no admin e no CSV**, nunca na tela pública. Quem pedir para apagar: busque o apelido no admin e clique em **Apagar**.
 
 ## Publicar (GitHub Pages) e funcionar offline
 1. Antes de publicar, rode (precisa só de Python): `python scripts/gerar_sw.py`. Isso atualiza o `sw.js`, que guarda uma cópia do jogo para funcionar sem internet.

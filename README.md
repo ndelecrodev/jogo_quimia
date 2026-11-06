@@ -23,7 +23,7 @@ Cada partida termina por 3 vidas ou 120 s. A dificuldade sobe por pontos, não p
 - Tela `ranking.html` para TV ou segundo monitor, atualizada ao vivo.
 - Modo atração, apelido em tela estilo arcade, tutorial de 3 s e navegação 100% sem mouse.
 - Código de resgate de 4 caracteres, brindes em 3 níveis e contagem regressiva do campeão.
-- Captura de contato opcional, com aceite LGPD, e QR codes gerados localmente.
+- Captura de contato opcional, com aviso de consentimento na tela (aceite = apertar SALVAR), e QR codes gerados localmente.
 - Painel admin oculto: conferir código, marcar entrega, exportar CSV/JSON, importar/restaurar, resetar o dia, **zerar tudo para abrir a feira**, **calibrar** metas com partidas reais e ajustar brindes e evento. O PIN é criado na primeira abertura.
 - Só entra no ranking quem jogou de verdade e fez o mínimo do jogo; partida parada não gasta tentativa.
 - Acessibilidade: textos grandes, contraste AA e opção de reduzir efeitos de piscar.

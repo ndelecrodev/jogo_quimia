@@ -8,7 +8,15 @@ export function minRank(settings, game) {
   return Math.max(1, Math.ceil((settings.minScores[game] || 2) / 2));
 }
 
+import { PARS } from '../config/difficulty.js';
+
 export const quimiaScore = (points, par) => Math.round((points / par) * 1000);
+
+/** Pontuação Quimia sempre recalculada dos pontos e do par ATUAL (não confia no valor gravado em partidas antigas). */
+export function quimiaOf(p, pars = PARS) {
+  const par = Number(pars && pars[p.game]) || PARS[p.game] || 300;
+  return quimiaScore(Number(p.points) || 0, par);
+}
 
 /** Ranking geral: maior Pontuação Quimia; empate → menos tempo; persistindo → quem fez primeiro. */
 export function compareQuimia(a, b) {
@@ -72,7 +80,8 @@ const byDay = (plays, day) => (day ? plays.filter((p) => dayKey(p.ts) === day) :
 
 /** opts.day = 'YYYY-MM-DD' (opcional) filtra por dia. */
 export function rankGeneral(plays, opts = {}) {
-  return bestPerNick(byDay(plays, opts.day), compareQuimia);
+  const base = byDay(plays, opts.day).map((p) => ({ ...p, quimia: quimiaOf(p, opts.pars) }));
+  return bestPerNick(base, compareQuimia);
 }
 
 export function rankGame(plays, game, opts = {}) {

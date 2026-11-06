@@ -81,7 +81,7 @@ export default class SobeGame extends BaseScene {
     this.pauseUI.add(this.add.rectangle(960, 540, W, H, 0x000000, 0.7));
     this.pauseTitle = T(this, 960, 450, 'PAUSA', 'display', { color: COLORS.neon });
     this.pauseUI.add(this.pauseTitle);
-    this.pauseUI.add(T(this, 960, 600, 'Ação: continuar     Voltar: sair', 'h3', { color: COLORS.white }));
+    this.pauseUI.add(T(this, 960, 600, 'ESPAÇO ou ✕: continuar  ·  Esc ou ○: sair', 'h3', { color: COLORS.white }));
   }
 
   // ---------- Geração ----------

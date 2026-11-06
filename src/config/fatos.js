@@ -11,5 +11,5 @@ export const FATOS = [
   'Colher e tampa ajudam a medir, mas confira sempre a dose indicada no rótulo.',
   'A FDS, a ficha de segurança, explica os riscos e os cuidados de cada produto.',
   'Luvas protegem a pele quando você usa produtos de limpeza mais fortes.',
-  'Em breve: pergunte pra Kemi, no app Quimia, o que pode ou não misturar.',
+  'Em breve: pergunte para a Kemi, no app Quimia, o que pode ou não misturar.',
 ];

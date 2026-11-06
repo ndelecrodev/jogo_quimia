@@ -5,6 +5,7 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getPlays, getSettings } from '../core/Storage.js';
 import { HUB_RESET_MS } from '../config/game.js';
+import { fmtNum } from '../core/format.js';
 import { officialAttempts } from '../core/Ranking.js';
 import { gameRanking } from '../core/RankingSource.js';
 import { GAMES } from '../config/games.js';
@@ -35,7 +36,7 @@ export default class Hub extends BaseScene {
       // Faixa no topo; nenhum apelido na tela (o próximo jogador não vê o de quem acabou de jogar)
       const faixa = this.add.graphics().setDepth(5);
       drawCard(faixa, 160, 40, 1600, 90, { fill: COLORS.elevated, stroke: COLORS.neon, sw: 4, r: 28 });
-      T(this, 960, 85, 'Sua jogada oficial já foi! Chame o próximo jogador 🎉', 'h2', { color: COLORS.neon, depth: 6 });
+      T(this, 960, 85, 'Sua jogada oficial acabou! Chame o próximo jogador.', 'h2', { color: COLORS.neon, depth: 6 });
       T(this, 960, 190, 'Quer treinar? Escolha um jogo (não vale ranking nem brinde)', 'h3', { color: COLORS.white });
     } else {
       T(this, 960, 90, `Olá, ${nick}!`, 'h1', { color: COLORS.neon });
@@ -70,7 +71,7 @@ export default class Hub extends BaseScene {
       c.add(T(this, 0, 10, g.name, compact ? 'h3' : 'h2', { color: COLORS.white }));
       c.add(T(this, 0, 85, g.desc, 'body', { color: COLORS.mint2, align: 'center', wordWrap: { width: CARD_W - 50 } }));
       const best = gameRanking(g.id)[0];
-      c.add(T(this, 0, 215, best ? `Melhor: ${best.points}` : 'Seja o primeiro!', 'h3', { color: COLORS.neon }));
+      c.add(T(this, 0, 215, best ? `Melhor: ${fmtNum(best.points)}` : 'Seja o primeiro!', 'h3', { color: COLORS.neon }));
       if (best && !this.done) c.add(T(this, 0, 262, best.nick, 'label', { color: COLORS.cyan })); // depois da jogada oficial, nenhum apelido na tela
       c.gfx = gfx;
       c.kemi = kemi;

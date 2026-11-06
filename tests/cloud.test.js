@@ -177,14 +177,14 @@ describe('fila de saída (outbox)', () => {
 
 describe('ranking: nuvem + local', () => {
   it('mescla sem duplicar (o local vale) e mantém o desempate: pontos, menor tempo, quem fez primeiro', () => {
-    const local = [partida(1, { nick: 'ANA', quimia: 700 }), partida(2, { nick: 'BIA', quimia: 800, durationMs: 50000 })];
+    const local = [partida(1, { nick: 'ANA', points: 21, quimia: 700 }), partida(2, { nick: 'BIA', points: 24, quimia: 800, durationMs: 50000 })];
     const remoto = [
       { id: '1', nick: 'ANA', game: 'bolha', points: 21, quimia: 700, duration_ms: 30000, day: '2026-11-05', played_at: '2026-11-05T10:00:00Z', official: true },
       { id: '3', nick: 'CAIO', game: 'bolha', points: 24, quimia: 800, duration_ms: 40000, day: '2026-11-05', played_at: '2026-11-05T10:01:00Z', official: true },
     ];
     const todas = mergePlays(local, remoto);
     expect(todas.length).toBe(3); // id 1 só uma vez
-    expect(rankGeneral(todas).map((p) => p.nick)).toEqual(['CAIO', 'BIA', 'ANA']); // CAIO e BIA empatam em 800: CAIO fez em menos tempo
+    expect(rankGeneral(todas, { pars: { bolha: 30 } }).map((p) => p.nick)).toEqual(['CAIO', 'BIA', 'ANA']); // CAIO e BIA empatam em 800: CAIO fez em menos tempo
     expect(rankGame(todas, 'bolha')[0].nick).toBe('CAIO');
   });
 });

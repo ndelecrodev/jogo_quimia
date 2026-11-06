@@ -1,6 +1,6 @@
 // Persistência 100% local (localStorage). Sem servidor.
 // Lê/escreve direto do localStorage a cada chamada para funcionar com 2 janelas (jogo + /ranking).
-import { MAX_ATTEMPTS, MAX_TIME_MS } from '../config/game.js';
+import { MAX_ATTEMPTS, MAX_TIME_MS, SETTINGS_VERSION } from '../config/game.js';
 import { PARS } from '../config/difficulty.js';
 import { PRIZES } from '../config/prizes.js';
 import { EVENT } from '../config/event.js';
@@ -53,12 +53,22 @@ function read() {
       const s = JSON.parse(raw);
       s.plays = Array.isArray(s.plays) ? s.plays : [];
       s.settings = s.settings || {};
+      if (s.settingsVersion !== SETTINGS_VERSION) {
+        // configuração salva por uma versão antiga: descarta o que depende de escala (mantém evento, brindes, PIN, estação…)
+        for (const k of ['pars', 'minScores', 'minRank', 'maxAttempts']) delete s.settings[k];
+        s.settingsVersion = SETTINGS_VERSION;
+        try {
+          localStorage.setItem(KEY, JSON.stringify(s));
+        } catch (e) {
+          logError('Storage.migrate', e);
+        }
+      }
       return s;
     }
   } catch (e) {
     logError('Storage.read', e);
   }
-  return { plays: [], settings: {} };
+  return { plays: [], settings: {}, settingsVersion: SETTINGS_VERSION };
 }
 
 function write(state) {
@@ -87,6 +97,13 @@ export function getSettings() {
 export function setSettings(patch) {
   const st = read();
   st.settings = { ...st.settings, ...patch };
+  write(st);
+}
+
+/** Volta ao padrão do código só o que depende da escala de pontos e das tentativas. */
+export function restoreScoringDefaults() {
+  const st = read();
+  for (const k of ['pars', 'minScores', 'minRank', 'maxAttempts']) delete st.settings[k];
   write(st);
 }
 

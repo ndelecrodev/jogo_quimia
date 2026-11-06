@@ -6,7 +6,7 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
 import { LIVES, W, H } from '../config/game.js';
-import { BUBBLE_LEVELS, bubbleParams, scaleScore } from '../config/difficulty.js';
+import { BUBBLE_LEVELS, BUBBLE_SHRINK_STEPS, bubbleParams, scaleScore } from '../config/difficulty.js';
 
 // ---- Constantes de física/visual (1080p) ----
 const FLOOR_Y = 1010; // topo da "prateleira" (chão)
@@ -54,6 +54,7 @@ export default class BubbleGame extends BaseScene {
 
     // Estado
     this.points = 0;
+    this.r = KEMI_R; // raio de colisão atual (encolhe a cada vida perdida)
     this.lives = LIVES;
     this.flaps = 0; // quantas vezes o jogador apertou (para detectar partida abandonada)
     this.elapsed = 0;
@@ -71,6 +72,7 @@ export default class BubbleGame extends BaseScene {
 
     // Kemi
     this.kemi = glowKemi(fitImage(this.add.image(KEMI_X, 540, kemiKey(this)).setDepth(10), 190));
+    this.kemiFullScale = this.kemi.baseScale; // tamanho 100% (reinicia a cada partida)
 
     // HUD
     this.scoreText = T(this, 960, 70, '0', 'display', { depth: 20, stroke: COLORS.bg, strokeThickness: 8 });
@@ -89,7 +91,7 @@ export default class BubbleGame extends BaseScene {
     this.pauseUI.add(this.add.rectangle(960, 540, W, H, 0x000000, 0.7));
     this.pauseTitle = T(this, 960, 450, 'PAUSA', 'display', { color: COLORS.neon });
     this.pauseUI.add(this.pauseTitle);
-    this.pauseUI.add(T(this, 960, 600, 'Ação: continuar     Voltar: sair', 'h3', { color: COLORS.white }));
+    this.pauseUI.add(T(this, 960, 600, 'ESPAÇO ou ✕: continuar  ·  Esc ou ○: sair', 'h3', { color: COLORS.white }));
   }
 
   // ---------- Frascos (desenhados em código) ----------
@@ -178,8 +180,31 @@ export default class BubbleGame extends BaseScene {
     burst(this, KEMI_X, this.kemi.y, 12);
     this.invUntil = this.elapsed + INVULN_MS;
     if (kind === 'floor') this.vy = -760;
-    this.lifeIcons.forEach((ic, i) => ic.setAlpha(i < this.lives ? 1 : 0.2));
+    this.lifeIcons.forEach((ic, i) => {
+      ic.setAlpha(i < this.lives ? 1 : 0.2);
+      if (i >= this.lives) ic.setScale(0.5);
+    });
+    this.shrinkKemi();
     if (this.lives <= 0) this.finish('lives');
+  }
+
+  /** Estoura e murcha: a bolha da Kemi encolhe um degrau (BUBBLE_SHRINK_STEPS) com bolhinhas, som e brilho rápido. */
+  shrinkKemi() {
+    const lost = LIVES - this.lives;
+    const f = BUBBLE_SHRINK_STEPS[Math.min(BUBBLE_SHRINK_STEPS.length - 1, Math.max(0, lost))];
+    this.r = KEMI_R * f; // hitbox acompanha o tamanho
+    const base = this.kemiFullScale * f;
+    this.kemi.baseScale = base;
+    sfx.play('pop');
+    burst(this, KEMI_X, this.kemi.y, 16);
+    this.tweens.killTweensOf(this.kemi);
+    this.kemi.setScale(base * 1.18);
+    this.tweens.add({ targets: this.kemi, scaleX: base, scaleY: base, duration: 250, ease: 'Back.easeOut' });
+    if (!this.fxReduced) {
+      this.kemi.setTint(hex(COLORS.danger));
+      this.time.delayedCall(90, () => !this.ended && this.kemi.setTint(hex(COLORS.cyanLight)));
+      this.time.delayedCall(180, () => this.kemi.clearTint());
+    }
   }
 
   finish(reason) {
@@ -255,13 +280,13 @@ export default class BubbleGame extends BaseScene {
     this.vy += GRAV * dt;
     this.kemi.y += this.vy * dt;
     this.kemi.rotation = Phaser.Math.Clamp(this.vy / 1800, -0.3, 0.45);
-    if (this.kemi.y < KEMI_R) {
-      this.kemi.y = KEMI_R;
+    if (this.kemi.y < this.r) {
+      this.kemi.y = this.r;
       this.vy = 0;
     }
     const inv = this.elapsed < this.invUntil;
-    if (this.kemi.y > FLOOR_Y - KEMI_R) {
-      this.kemi.y = FLOOR_Y - KEMI_R;
+    if (this.kemi.y > FLOOR_Y - this.r) {
+      this.kemi.y = FLOOR_Y - this.r;
       if (!inv) this.hit('floor');
       else this.vy = -500;
     }
@@ -277,8 +302,8 @@ export default class BubbleGame extends BaseScene {
       pipe.x -= dx;
       pipe.top.x = pipe.x;
       pipe.bot.x = pipe.x;
-      if (!inv && Math.abs(pipe.x - KEMI_X) < BODY_W / 2 + KEMI_R) {
-        const r = KEMI_R - 4;
+      if (!inv && Math.abs(pipe.x - KEMI_X) < BODY_W / 2 + this.r) {
+        const r = this.r - 4;
         if (this.pipeRects(pipe).some((q) => circleRect(KEMI_X, this.kemi.y, r, ...q))) {
           this.hit('pipe');
           break;
