@@ -10,3 +10,10 @@ export function championCountdown(hhmm, now = new Date()) {
   const p = (n) => String(n).padStart(2, '0');
   return `${p(Math.floor(s / 3600))}:${p(Math.floor((s % 3600) / 60))}:${p(s % 60)}`;
 }
+
+/** Texto para a atração e o ranking. Vazio se a hora não foi definida. */
+export function championText(hhmm, now = new Date()) {
+  if (!/^\d{1,2}:\d{2}$/.test(String(hhmm || '').trim())) return '';
+  const c = championCountdown(hhmm, now);
+  return c ? `Campeão em ${c}` : 'Prêmio Master: o campeão será anunciado!';
+}

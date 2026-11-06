@@ -1,9 +1,10 @@
-// Dados do evento. TODOS PROVISÓRIOS: troque aqui ou no painel admin.
+// Dados públicos do evento. Deixe vazio o que ainda não foi definido: o jogo simplesmente não mostra.
+// Dá para preencher AQUI (vale para todos os navegadores) ou no painel admin (Ctrl+Shift+A, vale só para o navegador onde foi salvo).
+// O PIN do admin NÃO fica neste arquivo: ele é criado na primeira abertura do admin.
 export const EVENT = {
-  endTime: '17:00', // [HORA_ENCERRAMENTO] anúncio do campeão (HH:MM, horário local)
-  instagram: '@quimia.app', // [INSTAGRAM] provisório
-  hashtag: '#QuimiaArcade', // [HASHTAG] provisório
-  adminPin: '2468', // [PIN_ADMIN] provisório — TROQUE antes da feira
-  urlUser: 'https://quimia.example/lista-de-espera', // [DESTINO_QR_USUARIO] provisório ("Em breve")
-  urlCompany: 'https://quimia.example/empresas', // [DESTINO_QR_EMPRESA] provisório
+  endTime: '', // hora do anúncio do campeão, formato HH:MM (ex.: '17:00')
+  instagram: '', // ex.: '@quimia.app'
+  hashtag: '', // ex.: '#QuimiaArcade'
+  urlUser: '', // QR "Para você" (landing de usuários / lista de espera), começa com https://
+  urlCompany: '', // QR "Para empresas" (landing B2B), começa com https://
 };

@@ -1,4 +1,4 @@
-// Pares do "Pode Misturar?". EXEMPLOS [VALIDAR]: a equipe precisa conferir CADA item contra as FDS
+// Pares do "Pode Misturar?". Ainda NÃO validados com as FDS (ver PENDENCIAS.md): a equipe precisa conferir CADA item contra as FDS
 // antes da feira. Para trocar pelas regras do simulador do app, use: python scripts/importar_misturas.py
 //
 // A ORDEM importa: os primeiros pares entram no começo do jogo (mais fáceis); os demais vão liberando por nível.
@@ -19,7 +19,7 @@ export const PRODUTOS = {
   desentupidor: { nome: 'Desentupidor (soda cáustica)', cor: 'teal1' },
 };
 
-const F = 'Exemplo [VALIDAR com a FDS]';
+const F = 'FDS';
 
 export const MISTURAS = [
   { a: 'sanitaria', b: 'vinagre', perigosa: true, porque: 'Libera gás cloro, que é tóxico e irrita olhos e pulmões.', fonte: F },

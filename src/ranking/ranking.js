@@ -1,7 +1,7 @@
 // Tela da TV (/ranking): Top 10 ao vivo, alterna Geral e jogos. Atualiza quando a janela do jogo grava algo.
 import { getPlays, getSettings, onChange } from '../core/Storage.js';
 import { rankGeneral, rankGame } from '../core/Ranking.js';
-import { championCountdown } from '../core/clock.js';
+import { championText } from '../core/clock.js';
 import { GAMES } from '../config/games.js';
 
 const app = document.getElementById('app');
@@ -47,8 +47,7 @@ function rotate() {
 }
 
 function tick() {
-  const c = championCountdown(getSettings().eventEnd);
-  footEl.textContent = c ? `Campeão em ${c}` : 'Prêmio Master: o campeão será anunciado!';
+  footEl.textContent = championText(getSettings().eventEnd);
 }
 
 render();

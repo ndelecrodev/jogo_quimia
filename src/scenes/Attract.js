@@ -5,7 +5,7 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getPlays, getSettings } from '../core/Storage.js';
 import { rankGeneral, rankGame } from '../core/Ranking.js';
-import { championCountdown } from '../core/clock.js';
+import { championText } from '../core/clock.js';
 import { GAMES } from '../config/games.js';
 
 // Modo Atração: Kemi, ranking rotativo e chamada para jogar.
@@ -92,8 +92,7 @@ export default class Attract extends BaseScene {
   }
 
   updateCountdown() {
-    const c = championCountdown(getSettings().eventEnd);
-    this.countdown.setText(c ? `Campeão em ${c}` : 'Prêmio Master: o campeão será anunciado!');
+    this.countdown.setText(championText(getSettings().eventEnd));
   }
 
   update(_, delta) {

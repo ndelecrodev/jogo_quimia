@@ -1,6 +1,13 @@
 // Regras de ranking (funções puras, testadas em tests/).
 // Só partidas OFICIAIS contam; vale a melhor de cada apelido.
 
+/** Pontos mínimos para entrar no ranking de um jogo: configurável no admin; padrão = metade da meta do brinde. */
+export function minRank(settings, game) {
+  const v = settings.minRank && Number(settings.minRank[game]);
+  if (v > 0) return v;
+  return Math.max(1, Math.ceil((settings.minScores[game] || 2) / 2));
+}
+
 export const quimiaScore = (points, par) => Math.round((points / par) * 1000);
 
 /** Ranking geral: maior Pontuação Quimia; empate → menos tempo; persistindo → quem fez primeiro. */

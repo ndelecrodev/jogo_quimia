@@ -18,11 +18,11 @@ export function defaultSettings() {
     maxTimeMs: MAX_TIME_MS,
     pars: { ...PARS },
     minScores: { ...PRIZES.minScores },
+    minRank: {}, // vazio = metade da meta de cada jogo (ver Ranking.minRank)
     prizes: { ...PRIZES.names },
     enabledGames: GAMES.filter((g) => g.enabledByDefault).map((g) => g.id),
     muted: false,
     reduceFlash: false,
-    adminPin: EVENT.adminPin,
     eventEnd: EVENT.endTime,
     instagram: EVENT.instagram,
     hashtag: EVENT.hashtag,
@@ -96,6 +96,20 @@ export function deletePlay(id) {
   const st = read();
   st.plays = st.plays.filter((x) => x.id !== id);
   write(st);
+}
+
+/** "Zerar tudo para abrir a feira": apaga partidas, contatos, códigos, o backup automático e o log de erros. Mantém as configurações. */
+export function clearAllPlays() {
+  const st = read();
+  st.plays = [];
+  try {
+    localStorage.setItem(KEY, JSON.stringify(st));
+    localStorage.removeItem(BACKUP); // o backup automático também guarda partidas e contatos
+    localStorage.removeItem('quimia_errors');
+  } catch (e) {
+    logError('Storage.clearAllPlays', e);
+  }
+  if (bc) bc.postMessage({ type: 'changed' });
 }
 
 export function replacePlays(plays) {

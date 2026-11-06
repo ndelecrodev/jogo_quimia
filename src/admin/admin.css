@@ -31,3 +31,7 @@
 #admin .err { color: #FF7A7A; min-height: 20px; }
 #admin .pin { max-width: 380px; margin: 18vh auto 0; text-align: center; }
 #admin .pin input { width: 100%; font-size: 28px; text-align: center; letter-spacing: 8px; margin: 12px 0; }
+#admin .alert { border-color: #FF7A7A; background: rgba(255,122,122,.12); }
+#admin .alert ul { margin: 6px 0 0 18px; padding: 0; }
+#admin .alert .where { color: #88ECE5; font-size: 13px; }
+#admin .okbox { border-color: #1EEE97; background: rgba(30,238,151,.1); }

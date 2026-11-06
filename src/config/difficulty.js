@@ -4,7 +4,7 @@ import { MAX_TIME_MS } from './game.js';
 // Quantos pontos para subir 1 nível, por jogo.
 export const PONTOS_POR_NIVEL = { bolha: 4, misturar: 5, sobe: 200, runner: 160 };
 
-// "par" de cada jogo: pontuação Quimia = round(pontos / par * 1000). [VALIDAR em playtest]
+// "par" de cada jogo: pontuação Quimia = round(pontos / par * 1000). (calibrar no admin com partidas reais)
 export const PARS = { bolha: 30, misturar: 40, sobe: 1200, runner: 1000 };
 
 // Kemi Bolha — um item por nível (o último se repete). Resolução 1080p:
