@@ -224,7 +224,7 @@ function renderPend() {
     ? `<div class="card alert"><b>Falta preencher antes de abrir o stand (${lista.length}):</b><ul>${lista
         .map((p) => `<li>${esc(p.texto)} <span class="where">→ ${esc(p.onde)}</span></li>`)
         .join('')}</ul></div>`
-    : '<div class="card okbox">Tudo preenchido: nenhuma pendência.</div>';
+    : ''; // tudo preenchido: não ocupa espaço
 }
 
 function playPrizes(p, s) {
