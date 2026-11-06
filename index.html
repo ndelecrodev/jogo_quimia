@@ -32,5 +32,9 @@
     <script src="./vendor/phaser.min.js"></script>
     <script src="./vendor/qrcode.js"></script>
     <script type="module" src="./src/main.js"></script>
+    <script>
+      // Funciona offline depois de aberto uma vez (service worker; gerado por scripts/gerar_sw.py)
+      if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    </script>
   </body>
 </html>

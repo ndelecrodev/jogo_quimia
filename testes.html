@@ -1,0 +1,65 @@
+<!doctype html>
+<!-- Roda os testes de tests/*.test.js direto no navegador, SEM Node. Abra pelo servir.py ou hospedado. -->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quimia Arcade — Testes</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <style>
+      body { margin: 0; padding: 24px; background: #142024; color: #F4FFFE; font: 16px 'Segoe UI', sans-serif; }
+      h1 { color: #1EEE97; margin-top: 0; }
+      .ok { color: #1EEE97; } .falha { color: #FF7A7A; }
+      li { margin: 4px 0; } code { color: #5ADFEA; }
+      #resumo { font-size: 22px; margin: 12px 0 20px; }
+    </style>
+  </head>
+  <body>
+    <h1>Testes do Quimia Arcade</h1>
+    <div id="resumo">Rodando…</div>
+    <ul id="lista"></ul>
+    <script type="module">
+      // Mini executor com os mesmos nomes do Vitest (describe, it, expect) para os arquivos de tests/.
+      const ARQUIVOS = ['./tests/ranking.test.js', './tests/difficulty.test.js'];
+      const SHIM = `
+const __r = { ok: [], falhas: [] }; let __suite = '';
+export const describe = (n, f) => { __suite = n; f(); };
+export const it = (n, f) => { try { f(); __r.ok.push(__suite + ' > ' + n); } catch (e) { __r.falhas.push(__suite + ' > ' + n + ': ' + e.message); } };
+const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const J = (x) => JSON.stringify(x);
+export const expect = (v) => ({
+  toBe: (x) => { if (!Object.is(v, x)) throw new Error('esperado ' + J(x) + ' mas veio ' + J(v)); },
+  toEqual: (x) => { if (!eq(v, x)) throw new Error('esperado ' + J(x) + ' mas veio ' + J(v)); },
+  toBeNull: () => { if (v !== null) throw new Error('esperado null mas veio ' + J(v)); },
+  toHaveLength: (n) => { if (v.length !== n) throw new Error('tamanho ' + v.length + ' != ' + n); },
+  toBeLessThan: (x) => { if (!(v < x)) throw new Error(v + ' não é < ' + x); },
+  toBeLessThanOrEqual: (x) => { if (!(v <= x)) throw new Error(v + ' não é <= ' + x); },
+  toBeGreaterThan: (x) => { if (!(v > x)) throw new Error(v + ' não é > ' + x); },
+  toBeGreaterThanOrEqual: (x) => { if (!(v >= x)) throw new Error(v + ' não é >= ' + x); },
+  toMatchObject: (x) => { if (!Object.keys(x).every((k) => v[k] === x[k])) throw new Error('objeto não bate: ' + J(v) + ' vs ' + J(x)); },
+});
+export const __resultado = () => __r;
+`;
+      const lista = document.getElementById('lista');
+      let total = 0, falhas = 0;
+      for (const arq of ARQUIVOS) {
+        try {
+          let src = await (await fetch(arq)).text();
+          src = src.replace(/import \{[^}]*\} from 'vitest';/, '').replace(/from '\.\.\/src\//g, `from '${new URL('./src/', location.href).href}`);
+          const url = URL.createObjectURL(new Blob([SHIM + '\n' + src], { type: 'text/javascript' }));
+          const r = (await import(url)).__resultado();
+          total += r.ok.length + r.falhas.length;
+          falhas += r.falhas.length;
+          r.ok.forEach((n) => (lista.innerHTML += `<li class="ok">✓ ${n}</li>`));
+          r.falhas.forEach((n) => (lista.innerHTML += `<li class="falha">✗ ${n}</li>`));
+        } catch (e) {
+          falhas++;
+          lista.innerHTML += `<li class="falha">✗ <code>${arq}</code>: ${e.message}</li>`;
+        }
+      }
+      const resumo = document.getElementById('resumo');
+      resumo.className = falhas ? 'falha' : 'ok';
+      resumo.textContent = falhas ? `${falhas} teste(s) falharam de ${total}` : `Tudo certo: ${total} testes passaram`;
+    </script>
+  </body>
+</html>

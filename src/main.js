@@ -56,13 +56,33 @@ document.addEventListener('visibilitychange', keepAwake);
 const hud = document.getElementById('hud');
 const drawHud = () => {
   const bits = [];
-  if (input.padConnected) bits.push('🎮 Controle conectado');
+  if (input.padConnected) bits.push(`🎮 ${input.padName || 'Controle'} conectado`);
   else bits.push('🎮 Aperte qualquer botão do controle');
   if (sfx.muted) bits.push('🔇 Mudo (M)');
   hud.textContent = bits.join('   ');
 };
 input.onPadChange(drawHud);
 drawHud();
+
+// ---- Contador de FPS oculto (tecla F3) para conferir o desempenho no notebook do stand ----
+const fpsEl = document.createElement('div');
+fpsEl.id = 'fps';
+fpsEl.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:6;display:none;padding:4px 10px;border-radius:8px;background:rgba(0,0,0,.6);color:#1EEE97;font:700 16px Nunito,sans-serif;pointer-events:none';
+document.body.appendChild(fpsEl);
+let fpsOn = false;
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'F3') {
+    e.preventDefault();
+    fpsOn = !fpsOn;
+    fpsEl.style.display = fpsOn ? 'block' : 'none';
+  }
+});
+setInterval(() => {
+  if (!fpsOn) return;
+  const mem = performance.memory ? ` · ${Math.round(performance.memory.usedJSHeapSize / 1048576)} MB` : '';
+  const cena = game.scene.getScenes(true)[0];
+  fpsEl.textContent = `${Math.round(game.loop.actualFps)} FPS${mem} · ${cena ? cena.scene.key : '-'}`;
+}, 500);
 
 // ---- Erros: nunca tela branca ----
 const oops = document.getElementById('oops');

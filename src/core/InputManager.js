@@ -20,6 +20,15 @@ const TEXT_BLOCK = new Set(['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyP', 'KeyM', 'Bac
 const PREVENT = new Set(['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Backspace', 'Enter']);
 const DEAD = 0.3; // zona morta do analógico
 
+/** Nome curto do controle a partir do id do navegador (ex.: "DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c ...)"). */
+export function padNameOf(id) {
+  const s = String(id || '');
+  if (/dualsense|0ce6|0df2/i.test(s)) return 'DualSense (PS5)';
+  if (/dualshock|054c|wireless controller/i.test(s)) return 'Controle PlayStation';
+  if (/xbox|xinput|045e/i.test(s)) return 'Controle Xbox';
+  return s.replace(/\(.*?\)/g, '').trim().slice(0, 28) || 'Controle';
+}
+
 class InputManager {
   constructor() {
     this.keys = new Set();
@@ -28,6 +37,7 @@ class InputManager {
     this.pointerDown = false;
     this.padIndex = null;
     this.padConnected = false;
+    this.padName = ''; // nome amigável do controle detectado (ex.: DualSense)
     this.padListeners = [];
     this.textHandlers = new Set(); // quem quer receber digitação do teclado físico
     this.lastInputAt = Date.now();
@@ -86,8 +96,10 @@ class InputManager {
     // --- Gamepad ---
     const pads = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter(Boolean);
     const connected = pads.some((p) => p.connected);
-    if (connected !== this.padConnected) {
+    const nome = connected ? padNameOf((pads.find((p) => p.index === this.padIndex && p.connected) || pads.find((p) => p.connected)).id) : '';
+    if (connected !== this.padConnected || nome !== this.padName) {
       this.padConnected = connected;
+      this.padName = nome;
       this.padListeners.forEach((cb) => cb(connected));
     }
     let pad = this.padIndex != null ? pads.find((p) => p.index === this.padIndex && p.connected) : null;
