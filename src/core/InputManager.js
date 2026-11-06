@@ -29,6 +29,7 @@ class InputManager {
     this.padIndex = null;
     this.padConnected = false;
     this.padListeners = [];
+    this.textHandlers = new Set(); // quem quer receber digitação do teclado físico
     this.lastInputAt = Date.now();
     this.cur = Object.fromEntries(NAMES.map((n) => [n, false]));
     this.prev = { ...this.cur };
@@ -39,6 +40,10 @@ class InputManager {
       const tag = e.target && e.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return; // digitando em campo (painel admin)
       if (PREVENT.has(e.code)) e.preventDefault();
+      // Digitação: entregue na hora (sem esperar o frame), na ordem certa. AltGr (Ctrl+Alt) conta como texto.
+      if (this.textMode && this.textHandlers.size && !e.metaKey && !(e.ctrlKey && !e.altKey)) {
+        this.textHandlers.forEach((cb) => cb(e));
+      }
       this.keys.add(e.code);
       this.tapped.add(e.code); // garante que toques rápidos (down+up entre dois frames) não se percam
       this.lastInputAt = Date.now();
@@ -54,6 +59,12 @@ class InputManager {
     });
     window.addEventListener('pointerup', () => (this.pointerDown = false));
     window.addEventListener('pointermove', () => (this.lastInputAt = Date.now()));
+  }
+
+  /** Recebe cada tecla digitada em modo texto (cb(KeyboardEvent)). Devolve a função que cancela. */
+  onText(cb) {
+    this.textHandlers.add(cb);
+    return () => this.textHandlers.delete(cb);
   }
 
   /** Avisa quando um controle conecta/desconecta. cb(connected:boolean) */

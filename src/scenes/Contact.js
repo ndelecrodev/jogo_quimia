@@ -27,7 +27,7 @@ export default class Contact extends BaseScene {
     this.bubbles = new BubbleField(this, 14);
 
     T(this, 960, 60, 'Entrou no ranking!', 'h1', { color: COLORS.neon });
-    T(this, 960, 125, 'Deixa seu @ ou WhatsApp para a gente te chamar se ganhar.', 'bodyL', { color: COLORS.mint2 });
+    T(this, 960, 125, 'Deixa seu @ ou WhatsApp para a gente te chamar se ganhar. Pode digitar no teclado.', 'bodyL', { color: COLORS.mint2 });
 
     const box = this.add.graphics();
     drawCard(box, 410, 165, 1100, 100, { fill: COLORS.card, stroke: COLORS.neon, sw: 4 });
@@ -65,18 +65,19 @@ export default class Contact extends BaseScene {
     this.fc = 0;
     this.refresh();
 
-    this.input.keyboard.on('keydown', (e) => {
+    // Teclado físico: digita direto, Backspace/Delete apagam, Enter salva
+    this.offText = input.onText((e) => {
       if (!this.ready(200)) return;
-      input.touch();
-      if (/^[a-z0-9@._-]$/i.test(e.key)) {
+      if (/^[a-z0-9@._-]$/i.test(e.key) && !e.repeat) {
         this.typedByKeyboard = true;
         this.add_(e.key.toLowerCase());
-      } else if (e.key === 'Backspace') this.del();
+      } else if (e.key === 'Backspace' || e.key === 'Delete') this.del();
       else if (e.key === 'Enter' && this.typedByKeyboard) {
         this.enterHandled = true;
         this.save();
       }
     });
+    this.events.once('shutdown', () => this.offText && this.offText());
   }
 
   focusKey() {

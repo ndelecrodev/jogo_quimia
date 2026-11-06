@@ -30,7 +30,7 @@ export default class Nickname extends BaseScene {
     this.bubbles = new BubbleField(this, 16);
 
     T(this, 960, 90, 'Qual é o seu apelido?', 'h1', { color: COLORS.neon });
-    T(this, 960, 160, 'Até 10 letras ou números. Ele aparece no ranking.', 'bodyL', { color: COLORS.mint2 });
+    T(this, 960, 160, 'Digite no teclado (Backspace apaga, Enter confirma) ou escolha as letras. Até 10 letras ou números.', 'bodyL', { color: COLORS.mint2 });
 
     this.boxG = this.add.graphics();
     drawCard(this.boxG, 560, 215, 800, 120, { fill: COLORS.card, stroke: COLORS.neon, sw: 4 });
@@ -59,20 +59,20 @@ export default class Nickname extends BaseScene {
     this.focusKey = () => this.keys.find((k) => k.r === this.fr && k.c === this.fc);
     this.refresh();
 
-    // Digitação pelo teclado físico
-    this.input.keyboard.on('keydown', (e) => {
+    // Digitação pelo teclado físico: letras e números digitam, Backspace/Delete apagam, Enter confirma.
+    this.offText = input.onText((e) => {
       if (!this.ready(200)) return;
-      input.touch();
-      if (/^[a-z0-9]$/i.test(e.key)) {
+      if (/^[a-z0-9]$/i.test(e.key) && !e.repeat) {
         this.typedByKeyboard = true;
         this.addChar(e.key.toUpperCase());
-      } else if (e.key === 'Backspace') {
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
         this.del();
       } else if (e.key === 'Enter' && this.typedByKeyboard) {
-        this.confirm();
         this.enterHandled = true;
+        this.confirm();
       }
     });
+    this.events.once('shutdown', () => this.offText && this.offText());
     this.updateName();
   }
 
