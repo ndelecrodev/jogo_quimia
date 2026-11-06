@@ -5,7 +5,6 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { isClean } from '../core/Profanity.js';
 import { getPlays } from '../core/Storage.js';
-import { NICK_MAX } from '../config/game.js';
 
 const ROWS = [
   'ABCDEFGHIJ'.split(''),
@@ -30,12 +29,11 @@ export default class Nickname extends BaseScene {
     this.bubbles = new BubbleField(this, 16);
 
     T(this, 960, 90, 'Qual é o seu apelido?', 'h1', { color: COLORS.neon });
-    T(this, 960, 160, 'Digite no teclado (Backspace apaga, Enter confirma) ou escolha as letras. Até 10 letras ou números.', 'bodyL', { color: COLORS.mint2 });
+    T(this, 960, 160, 'Digite no teclado (Backspace apaga, Enter confirma) ou escolha as letras. Letras e números.', 'bodyL', { color: COLORS.mint2 });
 
     this.boxG = this.add.graphics();
     drawCard(this.boxG, 560, 215, 800, 120, { fill: COLORS.card, stroke: COLORS.neon, sw: 4 });
     this.nameText = T(this, 960, 275, '', 'display');
-    this.counter = T(this, 1330, 320, `0/${NICK_MAX}`, 'label', { color: COLORS.sky2, origin: [1, 1] });
     this.msg = T(this, 960, 375, '', 'h3', { color: COLORS.danger });
 
     // Teclado de tela
@@ -93,11 +91,10 @@ export default class Nickname extends BaseScene {
 
   updateName() {
     this.nameText.setText(this.name + (Math.floor(this.time.now / 450) % 2 ? '_' : ' '));
-    this.counter.setText(`${this.name.length}/${NICK_MAX}`);
+    this.nameText.setScale(Math.min(1, 740 / Math.max(1, this.nameText.width))); // nome longo encolhe para caber na caixa
   }
 
   addChar(ch) {
-    if (this.name.length >= NICK_MAX) return sfx.play('error');
     this.name += ch;
     sfx.play('nav');
     this.msg.setText('');

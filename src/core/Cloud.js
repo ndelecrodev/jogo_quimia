@@ -98,12 +98,13 @@ export async function rpc(fn, body = {}) {
 }
 
 // ---------------- Fila de saída ----------------
+const CLOUD_NICK_MAX = 13;
 const stationId = () => String(getSettings().stationId || 'E1').slice(0, 12);
 
 export function playBody(p) {
   return {
     id: p.id,
-    nick: p.nick,
+    nick: String(p.nick).slice(0, CLOUD_NICK_MAX), // o banco aceita até 13 (schema.sql); acima disso a jogada seria recusada
     game: p.game,
     points: p.points,
     quimia: p.quimia,

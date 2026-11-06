@@ -1,6 +1,6 @@
 // GERADO por scripts/gerar_sw.py — não edite à mão. Rode `python scripts/gerar_sw.py` antes de publicar.
 // Service worker: rede primeiro (sempre a versão mais nova quando há internet) e cópia guardada quando está offline.
-const CACHE = 'quimia-arcade-a5a1030499';
+const CACHE = 'quimia-arcade-9ab38cc0f1';
 const ARQUIVOS = [
   "apple-touch-icon.png",
   "assets/kemi/kemi_down.png",

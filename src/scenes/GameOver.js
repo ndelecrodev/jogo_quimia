@@ -133,8 +133,8 @@ export default class GameOver extends BaseScene {
       this.prizeIcon(1400, 285);
       T(this, 1400, 360, 'SEU BRINDE', 'overline', { color: COLORS.sky2 });
       T(this, 1400, 415, premio, 'h1', { color: COLORS.mint2, wordWrap: { width: 720 }, align: 'center' });
-      const sizeNick = nick.length > 10 ? '72px' : nick.length > 7 ? '90px' : '108px';
-      const nickText = T(this, 1400, 520, nick, 'display', { color: COLORS.neon, fontSize: sizeNick });
+      const sizeNick = nick.length > 22 ? '40px' : nick.length > 14 ? '52px' : nick.length > 10 ? '72px' : nick.length > 7 ? '90px' : '108px';
+      const nickText = T(this, 1400, 520, nick, 'display', { color: COLORS.neon, fontSize: sizeNick, wordWrap: { width: 740 }, align: 'center' });
       this.tweens.add({ targets: nickText, scale: 1.05, duration: 600, yoyo: true, repeat: 2 });
       T(this, 1400, 615, 'Fale com a equipe no stand', 'bodyL', { color: COLORS.white });
       if (posGen === 1) T(this, 1400, 668, `Você está concorrendo ao Prêmio Master: ${settings.prizes.master}`, 'bodyS', { color: COLORS.neon, wordWrap: { width: 740 }, align: 'center' });
