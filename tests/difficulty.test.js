@@ -76,12 +76,12 @@ describe('Pode Misturar?: tempo para decidir', () => {
 });
 
 describe('limites do jogo (ajustes finais)', () => {
-  it('Kemi Bolha: vão de 300 a 224 (nunca abaixo, a física não deixa), velocidade até 430, nível a cada 4 pontos; Runner: até 800', () => {
+  it('Kemi Bolha: vão de 300 a 224 (nunca abaixo, a física não deixa), velocidade até 430, nível a cada 4 pontos; Runner: até 850', () => {
     expect(BUBBLE_LEVELS[0].gap).toBe(300);
     expect(Math.max(...BUBBLE_LEVELS.map((l) => l.speed))).toBe(430);
     expect(Math.min(...BUBBLE_LEVELS.map((l) => l.gap))).toBeGreaterThanOrEqual(224);
     expect(Math.max(...BUBBLE_LEVELS.map((l) => l.maxDelta))).toBeLessThanOrEqual(260);
-    expect(Math.max(...RUNNER_LEVELS.map((l) => l.speed))).toBeLessThanOrEqual(800);
+    expect(Math.max(...RUNNER_LEVELS.map((l) => l.speed))).toBeLessThanOrEqual(850);
     expect(PONTOS_POR_NIVEL.bolha).toBe(4);
     expect(bubbleParams(3, 0).level).toBe(0);
     expect(bubbleParams(4, 0).level).toBe(1);

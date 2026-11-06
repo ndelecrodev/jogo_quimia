@@ -3,10 +3,10 @@ import { MAX_TIME_MS } from './game.js';
 
 // Quantos pontos para subir 1 nível, por jogo.
 // Atenção: aqui contam os pontos BRUTOS do jogo (ritmo da dificuldade). O que a pessoa vê/ranqueia é o brutos x SCORE_SCALE.
-export const PONTOS_POR_NIVEL = { bolha: 4, sobe: 100, runner: 130 }; // (Pode Misturar? sobe por acertos: ver MIX_* abaixo)
+export const PONTOS_POR_NIVEL = { bolha: 4, sobe: 75, runner: 105 }; // (Pode Misturar? sobe por acertos: ver MIX_* abaixo)
 
 // Escala comum: pontuação exibida = round(ponto bruto x SCORE_SCALE[jogo]). Calibrada com bots (ver CALIBRACAO.md); recalibre no admin.
-export const SCORE_SCALE = { bolha: 15, misturar: 6, sobe: 2.7, runner: 0.62 };
+export const SCORE_SCALE = { bolha: 15, misturar: 6, sobe: 5, runner: 0.62 };
 // Fontes de pontos brutos por habilidade (não por tempo parado)
 export const MIX_COMBO_MAX = 3; // combo máximo x3
 export const SOBE_PT_ALTURA = 20; // 1 ponto bruto a cada 20 px de altura (antes 10)
@@ -59,16 +59,16 @@ export const MIX_LEVELS = [
 export const SOBE_PHYSICS = { gravity: 2400, bounce: 1150, speedX: 650 };
 export const SOBE_APEX = (SOBE_PHYSICS.bounce ** 2) / (2 * SOBE_PHYSICS.gravity); // ~275 px
 export const SOBE_LEVELS = [
-  { gapMin: 110, gapMax: 150, w: 210, moving: 0, breaking: 0, cloud: 0 },
-  { gapMin: 115, gapMax: 160, w: 210, moving: 0, breaking: 0, cloud: 0 },
+  { gapMin: 115, gapMax: 160, w: 200, moving: 0, breaking: 0, cloud: 0 },
   { gapMin: 120, gapMax: 170, w: 200, moving: 0, breaking: 0, cloud: 0 },
-  { gapMin: 125, gapMax: 180, w: 200, moving: 0.25, breaking: 0, cloud: 0 },
-  { gapMin: 130, gapMax: 185, w: 190, moving: 0.3, breaking: 0, cloud: 0.12 },
-  { gapMin: 135, gapMax: 195, w: 190, moving: 0.3, breaking: 0.25, cloud: 0.15 },
-  { gapMin: 140, gapMax: 200, w: 180, moving: 0.35, breaking: 0.3, cloud: 0.18 },
-  { gapMin: 145, gapMax: 205, w: 170, moving: 0.35, breaking: 0.3, cloud: 0.2 },
-  { gapMin: 150, gapMax: 210, w: 160, moving: 0.4, breaking: 0.35, cloud: 0.22 },
-  { gapMin: 155, gapMax: 215, w: 150, moving: 0.4, breaking: 0.35, cloud: 0.25 },
+  { gapMin: 125, gapMax: 180, w: 190, moving: 0, breaking: 0, cloud: 0 },
+  { gapMin: 130, gapMax: 190, w: 185, moving: 0.35, breaking: 0, cloud: 0 },
+  { gapMin: 135, gapMax: 195, w: 180, moving: 0.4, breaking: 0, cloud: 0.18 },
+  { gapMin: 140, gapMax: 205, w: 175, moving: 0.4, breaking: 0.3, cloud: 0.22 },
+  { gapMin: 145, gapMax: 210, w: 165, moving: 0.45, breaking: 0.35, cloud: 0.26 },
+  { gapMin: 150, gapMax: 215, w: 160, moving: 0.45, breaking: 0.4, cloud: 0.3 },
+  { gapMin: 155, gapMax: 218, w: 150, moving: 0.5, breaking: 0.4, cloud: 0.32 },
+  { gapMin: 160, gapMax: 218, w: 140, moving: 0.5, breaking: 0.45, cloud: 0.35 },
 ];
 
 // Kemi Runner — pulo (segurar = mais alto) e abaixar. Pontos = distância/40 + 25 por bolhinha.
@@ -81,16 +81,16 @@ export const RUNNER_APEX = (RUNNER_PHYSICS.jump ** 2) / (2 * RUNNER_PHYSICS.grav
 export const RUNNER_OBSTACLES = { low: 110, tall: 180, bottleW: 70, tallW: 78, clusterGap: 110 };
 export const RUNNER_CLUSTER_SPAN = RUNNER_OBSTACLES.bottleW * 2 + RUNNER_OBSTACLES.clusterGap;
 export const RUNNER_LEVELS = [
-  { speed: 520, tall: 0, vapor: 0, cluster: 0, gapMin: 1.35, gapMax: 1.9 },
-  { speed: 550, tall: 0.25, vapor: 0, cluster: 0, gapMin: 1.3, gapMax: 1.8 },
-  { speed: 580, tall: 0.3, vapor: 0.2, cluster: 0, gapMin: 1.25, gapMax: 1.7 },
-  { speed: 615, tall: 0.3, vapor: 0.25, cluster: 0, gapMin: 1.2, gapMax: 1.65 },
-  { speed: 650, tall: 0.3, vapor: 0.3, cluster: 0.15, gapMin: 1.15, gapMax: 1.6 },
-  { speed: 690, tall: 0.35, vapor: 0.3, cluster: 0.2, gapMin: 1.1, gapMax: 1.55 },
-  { speed: 725, tall: 0.35, vapor: 0.35, cluster: 0.25, gapMin: 1.1, gapMax: 1.5 },
-  { speed: 760, tall: 0.4, vapor: 0.35, cluster: 0.25, gapMin: 1.05, gapMax: 1.45 },
-  { speed: 785, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
-  { speed: 800, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
+  { speed: 540, tall: 0, vapor: 0, cluster: 0, gapMin: 1.3, gapMax: 1.8 },
+  { speed: 575, tall: 0.25, vapor: 0, cluster: 0, gapMin: 1.25, gapMax: 1.7 },
+  { speed: 610, tall: 0.3, vapor: 0.25, cluster: 0, gapMin: 1.2, gapMax: 1.6 },
+  { speed: 645, tall: 0.3, vapor: 0.3, cluster: 0, gapMin: 1.15, gapMax: 1.55 },
+  { speed: 680, tall: 0.35, vapor: 0.3, cluster: 0.2, gapMin: 1.1, gapMax: 1.5 },
+  { speed: 720, tall: 0.35, vapor: 0.35, cluster: 0.25, gapMin: 1.08, gapMax: 1.45 },
+  { speed: 755, tall: 0.4, vapor: 0.35, cluster: 0.3, gapMin: 1.05, gapMax: 1.4 },
+  { speed: 790, tall: 0.4, vapor: 0.4, cluster: 0.3, gapMin: 1.05, gapMax: 1.35 },
+  { speed: 820, tall: 0.45, vapor: 0.4, cluster: 0.35, gapMin: 1.05, gapMax: 1.3 },
+  { speed: 845, tall: 0.45, vapor: 0.45, cluster: 0.35, gapMin: 1.05, gapMax: 1.3 },
 ];
 
 export function levelFor(points, perLevel, maxLevel) {

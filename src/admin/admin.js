@@ -221,9 +221,9 @@ function renderMain() {
 function renderPend() {
   const lista = listarPendencias(getSettings());
   root.querySelector('#pend').innerHTML = lista.length
-    ? `<div class="card alert"><b>Falta preencher antes de abrir o stand (${lista.length}):</b><ul>${lista
+    ? `<details class="card alert"><summary><b>Falta preencher antes de abrir o stand (${lista.length})</b> — clique para ver</summary><ul>${lista
         .map((p) => `<li>${esc(p.texto)} <span class="where">→ ${esc(p.onde)}</span></li>`)
-        .join('')}</ul></div>`
+        .join('')}</ul></details>`
     : ''; // tudo preenchido: não ocupa espaço
 }
 
@@ -448,6 +448,7 @@ async function wipeEverything() {
   if (root.querySelector('#wipeBackup').checked) exportJson('quimia-arcade-backup-antes-de-zerar');
   clearAllPlays();
   root.querySelector('#wipeBox').innerHTML = '<div class="card okbox">Tudo zerado. O ranking está vazio e pronto para abrir.</div>';
+  setTimeout(() => { const b = root.querySelector('#wipeBox'); if (b) b.innerHTML = ''; }, 5000); // o aviso some sozinho
   renderStats();
   renderTable();
   renderCalib();

@@ -121,13 +121,13 @@ export default class GameOver extends BaseScene {
     drawCard(right, 1000, 190, 800, 500, { stroke: official ? COLORS.neon : COLORS.elevated2, sw: official ? 5 : 3 });
     if (official) {
       const premio = prizes.includes('meta') ? settings.prizes.meta : settings.prizes.participacao; // só o maior nível
-      this.prizeIcon(1400, 262);
-      T(this, 1400, 385, 'SEU BRINDE', 'overline', { color: COLORS.sky2 });
-      T(this, 1400, 442, premio, 'h1', { color: COLORS.mint2, wordWrap: { width: 720 }, align: 'center' });
-      const sizeNick = nick.length > 10 ? '84px' : nick.length > 7 ? '104px' : '124px';
-      const nickText = T(this, 1400, 545, nick, 'display', { color: COLORS.neon, fontSize: sizeNick });
+      this.prizeIcon(1400, 285);
+      T(this, 1400, 360, 'SEU BRINDE', 'overline', { color: COLORS.sky2 });
+      T(this, 1400, 415, premio, 'h1', { color: COLORS.mint2, wordWrap: { width: 720 }, align: 'center' });
+      const sizeNick = nick.length > 10 ? '72px' : nick.length > 7 ? '90px' : '108px';
+      const nickText = T(this, 1400, 520, nick, 'display', { color: COLORS.neon, fontSize: sizeNick });
       this.tweens.add({ targets: nickText, scale: 1.05, duration: 600, yoyo: true, repeat: 2 });
-      T(this, 1400, 625, 'Fale com a equipe no stand', 'bodyL', { color: COLORS.white });
+      T(this, 1400, 615, 'Fale com a equipe no stand', 'bodyL', { color: COLORS.white });
       if (posGen === 1) T(this, 1400, 668, `Você está concorrendo ao Prêmio Master: ${settings.prizes.master}`, 'bodyS', { color: COLORS.neon, wordWrap: { width: 740 }, align: 'center' });
     } else {
       T(this, 1400, 420, 'Sem brinde desta vez.', 'h2', { color: COLORS.white });
@@ -167,19 +167,19 @@ export default class GameOver extends BaseScene {
 
   /** Ícone do brinde: bolha com estrela. */
   prizeIcon(x, y) {
-    const bolha = this.add.image(x, y, 'pickup').setScale(2.3).setDepth(6);
+    const bolha = this.add.image(x, y, 'pickup').setScale(1.15).setDepth(6);
     const star = this.add.graphics().setDepth(7);
     const pts = [];
     for (let i = 0; i < 10; i++) {
-      const r = i % 2 ? 22 : 48;
+      const r = i % 2 ? 13 : 29;
       const a = -Math.PI / 2 + (i * Math.PI) / 5;
       pts.push({ x: x + Math.cos(a) * r, y: y + 4 + Math.sin(a) * r });
     }
     star.fillStyle(hex(COLORS.neon), 1);
     star.fillPoints(pts, true);
-    star.lineStyle(5, hex(COLORS.bg), 1);
+    star.lineStyle(4, hex(COLORS.bg), 1);
     star.strokePoints(pts, true);
-    this.tweens.add({ targets: bolha, scale: 2.45, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: bolha, scale: 1.25, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   /** Tela para partida abandonada: sem código, sem brinde, não gastou tentativa. */

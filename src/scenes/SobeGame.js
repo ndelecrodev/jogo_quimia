@@ -269,14 +269,7 @@ export default class SobeGame extends BaseScene {
       this.scoreText.setText(String(scaleScore('sobe', pts)));
     }
 
-    // Nunca fica presa: sem subir por STUCK_MS, aparece uma prateleira larga acima dela
-    if (this.height > this.bestHeight + 5) {
-      this.bestHeight = this.height;
-      this.lastClimb = this.elapsed;
-    } else if (this.elapsed - this.lastClimb > STUCK_MS) {
-      this.addPlatform(Phaser.Math.Clamp(this.kemi.x, 200, W - 200), Math.max(120, this.kemi.y - 210), 'plat_n', 300);
-      this.lastClimb = this.elapsed;
-    }
+    // (sem prateleiras de ajuda: ficar parado não gera plataformas; o jogo já cria uma prateleira alcançável por linha)
 
     const inv = this.elapsed < this.invUntil;
     const bottom = this.kemi.y + KR;

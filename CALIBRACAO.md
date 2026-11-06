@@ -50,3 +50,6 @@ Ficou **224 px** (300 → 224 em passos de ~12; velocidade 250 → 430; `maxDelt
 - Bot "médio" do Bolha perde as 3 vidas em ~19 s e o "bom" em ~37 s (meta humana: mediano 45-75 s). Os bots não antecipam como uma pessoa; vale conferir com gente de verdade nas primeiras partidas.
 - Bots do Kemi Sobe quase não distinguem médio de bom (a mira deles é tosca); o número de Sobe é o menos confiável.
 - Depois de mudar `SCORE_SCALE`, `PARS` ou `minScores`: **Zerar tudo** (local e nuvem), senão o ranking mistura escalas.
+
+## Atualização (Sobe e Runner mais difíceis, sem prateleiras de ajuda)
+Depois de endurecer o Kemi Sobe e o Kemi Runner e de tirar as prateleiras que surgiam sozinhas quando a Kemi ficava parada, o bot médio do Sobe passou a perder as 3 vidas em ~18 s (antes ~32 s; as prateleiras de ajuda o salvavam) e a mediana bruta caiu de 73 para 23. Como o bot é fraco no Sobe, **não** igualei a mediana dele aos outros jogos (daria escala 8, generosa demais para pessoas): `SCORE_SCALE.sobe = 5` e meta do brinde 110. Runner: bot médio 177, bom 440 (escala 0,62 mantida). **Revise o Sobe com as primeiras partidas reais** (admin > Calibrar).
