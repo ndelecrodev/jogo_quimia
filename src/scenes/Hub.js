@@ -29,7 +29,7 @@ export default class Hub extends BaseScene {
     this.sel = Math.min(this.registry.get('hubSel') || 0, this.games.length - 1);
     this.enterWall = Date.now();
 
-    const used = officialAttempts(plays, nick);
+    const used = officialAttempts(plays, nick, this.registry.get('contact'));
     const left = Math.max(0, settings.maxAttempts - used);
     this.done = left <= 0; // a jogada oficial já foi: a próxima pessoa deve assumir
     if (this.done) {
@@ -98,7 +98,7 @@ export default class Hub extends BaseScene {
     if (!this.ready()) return;
     // Jogada oficial já feita: sem apertar nada por HUB_RESET_MS, limpa o jogador e volta à atração
     if (this.done && Date.now() - Math.max(input.lastInputAt, this.enterWall) > HUB_RESET_MS) {
-      this.registry.remove('nick');
+      ['nick', 'contact'].forEach((k) => this.registry.remove(k));
       return this.scene.start('Attract');
     }
     if (input.pressed('left') && this.sel > 0) { this.sel--; sfx.play('nav'); this.refresh(); }
@@ -112,7 +112,7 @@ export default class Hub extends BaseScene {
     if (input.pressed('back')) {
       // "Trocar de jogador": esquece o apelido atual e vai para a tela de apelido
       sfx.play('back');
-      this.registry.remove('nick');
+      ['nick', 'contact'].forEach((k) => this.registry.remove(k));
       this.scene.start('Nickname');
     }
   }

@@ -22,6 +22,7 @@ export default class Contact extends BaseScene {
     this.begin();
     input.textMode = true;
     this.playId = data.playId;
+    this.pre = !!data.pre; // antes de jogar: o contato identifica a pessoa (quem já fez a jogada oficial)
     this.next = data.next || { scene: 'Hub' };
     this.value = '';
     this.company = false;
@@ -29,8 +30,17 @@ export default class Contact extends BaseScene {
     addBackground(this);
     this.bubbles = new BubbleField(this, 14);
 
-    T(this, 960, 60, 'Entrou no ranking!', 'h1', { color: COLORS.neon });
-    T(this, 960, 125, 'É opcional: deixe seu @ ou WhatsApp para a equipe falar com você sobre o brinde. Pode digitar no teclado.', 'bodyL', { color: COLORS.mint2 });
+    T(this, 960, 60, this.pre ? 'Seu contato' : 'Entrou no ranking!', 'h1', { color: COLORS.neon });
+    T(
+      this,
+      960,
+      125,
+      this.pre
+        ? 'Deixe seu @ ou WhatsApp: ele confirma sua jogada oficial e é por onde a equipe fala do brinde. Pode digitar no teclado.'
+        : 'É opcional: deixe seu @ ou WhatsApp para a equipe falar com você sobre o brinde. Pode digitar no teclado.',
+      'bodyL',
+      { color: COLORS.mint2 }
+    );
 
     const box = this.add.graphics();
     drawCard(box, 410, 165, 1100, 100, { fill: COLORS.card, stroke: COLORS.neon, sw: 4 });
@@ -131,8 +141,18 @@ export default class Contact extends BaseScene {
     const v = this.value.trim();
     if (v.length < MIN_LEN) return sfx.play('error'); // SALVAR está cinza: sem mensagem vermelha
     const type = v.startsWith('@') ? 'instagram' : /^\+?\d[\d\s()-]{7,}$/.test(v) ? 'whatsapp' : /@.+\./.test(v) ? 'email' : 'outro';
-    updatePlay(this.playId, { contact: v, contactType: type, consent: true, consentText: CONSENT_TEXT_VERSION, consentAt: new Date().toISOString(), company: this.company });
-    sfx.play('fanfare');
+    const consentAt = new Date().toISOString();
+    if (this.pre) {
+      // Guarda no jogador atual; a jogada oficial grava (e manda para a nuvem) junto do resultado
+      this.registry.set('contact', v);
+      this.registry.set('contactType', type);
+      this.registry.set('contactCompany', this.company);
+      this.registry.set('contactConsentText', CONSENT_TEXT_VERSION);
+      this.registry.set('contactConsentAt', consentAt);
+    } else {
+      updatePlay(this.playId, { contact: v, contactType: type, consent: true, consentText: CONSENT_TEXT_VERSION, consentAt, company: this.company });
+    }
+    sfx.play(this.pre ? 'ok' : 'fanfare');
     this.done();
   }
 

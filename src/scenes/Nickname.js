@@ -139,9 +139,10 @@ export default class Nickname extends BaseScene {
   go(nick) {
     sfx.play('ok');
     this.registry.set('nick', nick);
+    ['contact', 'contactType', 'contactCompany'].forEach((k) => this.registry.remove(k));
     const solo = this.registry.get('solo');
-    if (solo) this.scene.start('Tutorial', { gameId: solo });
-    else this.scene.start('Hub');
+    // Contato antes de jogar: é ele que diz se a pessoa já fez a jogada oficial (apelidos podem repetir)
+    this.scene.start('Contact', { pre: true, next: solo ? { scene: 'Tutorial', data: { gameId: solo } } : { scene: 'Hub' } });
   }
 
   moveVertical(dir) {

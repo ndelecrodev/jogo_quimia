@@ -19,7 +19,7 @@ export default class Attract extends BaseScene {
 
   create() {
     this.begin();
-    this.registry.remove('nick'); // reset limpo entre jogadores
+    ['nick', 'contact', 'contactType', 'contactCompany'].forEach((k) => this.registry.remove(k)); // reset limpo entre jogadores
     addBackground(this);
     this.bubbles = new BubbleField(this, 26);
 

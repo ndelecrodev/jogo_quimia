@@ -65,11 +65,22 @@ export function dayKey(ts) {
 
 const nickKey = (n) => String(n).trim().toLowerCase();
 
+/** Contato normalizado: e-mail/@ em minúsculas sem "@" inicial; telefone só com dígitos. '' se não houver. */
+export function contactKey(c) {
+  const s = String(c || '').trim().toLowerCase();
+  if (!s) return '';
+  if (/^[+(\d][\d\s()+-]*$/.test(s) && s.replace(/\D/g, '').length >= 8) return `t:${s.replace(/\D/g, '')}`; // aceita "(11) 91234-5678"
+  return `c:${s.replace(/^@+/, '')}`;
+}
+
+/** Quem é a pessoa: o contato, se tiver; senão o apelido (dois "Maria" com contatos diferentes são pessoas diferentes). */
+const personKey = (p) => contactKey(p.contact) || `n:${nickKey(p.nick)}`;
+
 function bestPerNick(plays, cmp) {
   const m = new Map();
   for (const p of plays) {
     if (!p.official || p.rankable === false) continue; // treino e abaixo do mínimo não entram no ranking
-    const k = nickKey(p.nick);
+    const k = personKey(p);
     const cur = m.get(k);
     if (!cur || cmp(p, cur) < 0) m.set(k, p);
   }
@@ -89,13 +100,16 @@ export function rankGame(plays, game, opts = {}) {
 }
 
 /** Posição (1-based) do apelido no ranking, ou null. */
-export function positionOfNick(ranking, nick) {
-  const i = ranking.findIndex((p) => nickKey(p.nick) === nickKey(nick));
+export function positionOfNick(ranking, nick, contact) {
+  const ck = contactKey(contact);
+  const i = ranking.findIndex((p) => (ck ? contactKey(p.contact) === ck : nickKey(p.nick) === nickKey(nick)));
   return i < 0 ? null : i + 1;
 }
 
-export function officialAttempts(plays, nick) {
-  return plays.filter((p) => p.official && nickKey(p.nick) === nickKey(nick)).length;
+/** Jogadas oficiais já feitas. Com contato, vale o contato (o apelido pode repetir); sem contato, vale o apelido. */
+export function officialAttempts(plays, nick, contact) {
+  const ck = contactKey(contact);
+  return plays.filter((p) => p.official && (ck ? contactKey(p.contact) === ck : !contactKey(p.contact) && nickKey(p.nick) === nickKey(nick))).length;
 }
 
 // Código de resgate: 4 caracteres sem letras/números ambíguos (0/O, 1/I/L).

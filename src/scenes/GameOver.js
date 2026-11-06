@@ -4,7 +4,7 @@ import { COLORS, hex } from '../theme.js';
 import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
-import { addPlay, getPlays, getSettings } from '../core/Storage.js';
+import { addPlay, updatePlay, getPlays, getSettings } from '../core/Storage.js';
 import { gameRanking, generalRanking } from '../core/RankingSource.js';
 import { quimiaScore, positionOfNick, officialAttempts, generateCode, dayKey, minRank } from '../core/Ranking.js';
 import { gameById } from '../config/games.js';
@@ -42,7 +42,8 @@ export default class GameOver extends BaseScene {
     }
 
     // --- Registro da partida ---
-    const attempts = officialAttempts(before, nick);
+    const contact = this.registry.get('contact') || null; // informado antes do Hub; é ele que identifica quem já jogou
+    const attempts = officialAttempts(before, nick, contact);
     const official = attempts < settings.maxAttempts; // jogou de verdade e ainda tinha tentativa: gasta 1 e ganha código
     const minR = minRank(settings, game);
     const rankable = official && points >= minR; // só entra no ranking quem fez o mínimo do jogo
@@ -69,15 +70,23 @@ export default class GameOver extends BaseScene {
       code,
       prizes,
       delivered: false,
-      contact: null,
+      contact: official && contact ? contact : null,
+      contactType: official && contact ? this.registry.get('contactType') || null : null,
+      company: official && contact ? !!this.registry.get('contactCompany') : false,
       consent: false,
     };
+    if (play.contact) {
+      play.consent = true; // o aceite foi o toque em SALVAR na tela de contato
+      play.consentText = this.registry.get('contactConsentText') || null;
+      play.consentAt = this.registry.get('contactConsentAt') || null;
+    }
     addPlay(play);
+    if (play.contact) updatePlay(play.id, { consent: true }); // manda o contato para a nuvem (depois da jogada na fila)
     this.play = play;
 
     // posições: partidas locais + ranking da nuvem em cache (sem nuvem, só o local, como sempre)
-    const posGame = rankable ? positionOfNick(gameRanking(game), nick) : null;
-    const posGen = rankable ? positionOfNick(generalRanking(), nick) : null;
+    const posGame = rankable ? positionOfNick(gameRanking(game), nick, play.contact) : null;
+    const posGen = rankable ? positionOfNick(generalRanking(), nick, play.contact) : null;
 
     // Captura de contato: só quem entrou no Top 3 do jogo ou atingiu a meta do brinde
     this.eligible = rankable && ((posGame !== null && posGame <= 3) || prizes.includes('meta'));
