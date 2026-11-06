@@ -41,6 +41,7 @@ export default class MixGame extends BaseScene {
     // Estado
     this.points = 0;
     this.lives = LIVES;
+    this.answers = 0; // respostas dadas pelo jogador (tempo esgotado não conta)
     this.elapsed = 0;
     this.streak = 0;
     this.level = 0;
@@ -171,6 +172,7 @@ export default class MixGame extends BaseScene {
     if (this.locked || !this.round) return;
     this.locked = true;
     const { pair } = this.round;
+    if (choice !== null) this.answers++;
     const correct = choice !== null && (choice === 'danger') === pair.perigosa;
     const [l, r] = this.items;
 
@@ -234,6 +236,7 @@ export default class MixGame extends BaseScene {
         points: this.points,
         durationMs: Math.round(this.elapsed),
         reason,
+        acted: this.answers >= 1,
         wrong: this.wrong.map(({ pair }) => ({ a: nomeDe(pair.a), b: nomeDe(pair.b), perigosa: pair.perigosa, porque: pair.porque })),
       })
     );

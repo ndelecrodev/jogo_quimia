@@ -49,6 +49,7 @@ export default class RunnerGame extends BaseScene {
     this.dist = 0;
     this.bubblesGot = 0;
     this.lives = LIVES;
+    this.actions = 0; // pulos e agachadas do jogador (o 1º pulo é o que inicia a corrida)
     this.elapsed = 0;
     this.speed = RUNNER_LEVELS[0].speed;
     this.level = 0;
@@ -157,6 +158,7 @@ export default class RunnerGame extends BaseScene {
 
   // ---------- Ações ----------
   jump() {
+    this.actions++;
     this.vy = -JUMP;
     this.onGround = false;
     this.cut = false;
@@ -192,7 +194,7 @@ export default class RunnerGame extends BaseScene {
     burst(this, KX, this.feet - 60, 24);
     this.kemi.setVisible(false);
     this.time.delayedCall(900, () =>
-      this.scene.start('GameOver', { game: 'runner', points: this.points, durationMs: Math.round(this.elapsed), reason })
+      this.scene.start('GameOver', { game: 'runner', points: this.points, durationMs: Math.round(this.elapsed), reason, acted: this.actions >= 2 })
     );
   }
 
@@ -222,6 +224,7 @@ export default class RunnerGame extends BaseScene {
     const pressJump = this.ready() && (input.pressed('action') || input.pressed('up'));
     const holdJump = input.held('action') || input.held('up');
     const ducking = input.held('down') && this.onGround;
+    if (ducking) this.actions += 2; // agachar já mostra que a pessoa está jogando
 
     if (!this.started) {
       if (pressJump) {

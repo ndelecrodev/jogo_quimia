@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   quimiaScore,
+  minRank,
   rankGeneral,
   rankGame,
   positionOfNick,
@@ -42,6 +43,20 @@ describe('ranking geral', () => {
     ]);
     expect(r).toHaveLength(1);
     expect(r[0].quimia).toBe(700);
+  });
+});
+
+describe('partidas abaixo do mínimo', () => {
+  it('não entram no ranking (rankable: false), mas partidas antigas sem o campo continuam valendo', () => {
+    const r = rankGeneral([play({ nick: 'A', quimia: 900, rankable: false }), play({ nick: 'B', quimia: 100 }), play({ nick: 'C', quimia: 50, rankable: true })]);
+    expect(r.map((p) => p.nick)).toEqual(['B', 'C']);
+    expect(rankGame([play({ nick: 'A', points: 3, rankable: false })], 'bolha')).toHaveLength(0);
+  });
+
+  it('mínimo para entrar no ranking: o configurado, ou metade da meta do brinde', () => {
+    const settings = { minScores: { bolha: 15, sobe: 600 }, minRank: { sobe: 100 } };
+    expect(minRank(settings, 'bolha')).toBe(8);
+    expect(minRank(settings, 'sobe')).toBe(100);
   });
 });
 

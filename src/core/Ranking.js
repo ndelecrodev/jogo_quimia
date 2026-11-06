@@ -35,7 +35,7 @@ const nickKey = (n) => String(n).trim().toLowerCase();
 function bestPerNick(plays, cmp) {
   const m = new Map();
   for (const p of plays) {
-    if (!p.official) continue;
+    if (!p.official || p.rankable === false) continue; // treino e abaixo do mínimo não entram no ranking
     const k = nickKey(p.nick);
     const cur = m.get(k);
     if (!cur || cmp(p, cur) < 0) m.set(k, p);

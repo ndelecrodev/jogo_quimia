@@ -37,7 +37,7 @@ export default class DummyGame extends BaseScene {
     }
     if (this.left <= 0 && !this.done) {
       this.done = true;
-      this.scene.start('GameOver', { game: this.gameId, points: this.points, durationMs: 10000, reason: 'time' });
+      this.scene.start('GameOver', { game: this.gameId, points: this.points, durationMs: 10000, reason: 'time', acted: true });
     }
   }
 }

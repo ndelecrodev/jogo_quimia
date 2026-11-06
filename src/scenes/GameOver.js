@@ -5,7 +5,7 @@ import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage } from '../u
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { addPlay, getPlays, getSettings } from '../core/Storage.js';
-import { quimiaScore, rankGame, rankGeneral, positionOfNick, officialAttempts, generateCode, dayKey } from '../core/Ranking.js';
+import { quimiaScore, rankGame, rankGeneral, positionOfNick, officialAttempts, generateCode, dayKey, minRank } from '../core/Ranking.js';
 import { gameById } from '../config/games.js';
 import { FATOS } from '../config/fatos.js';
 
@@ -17,21 +17,34 @@ export default class GameOver extends BaseScene {
 
   create(data) {
     this.begin();
-    const { game, points, durationMs, reason } = data;
+    const { game, points, durationMs, reason, acted } = data;
     this.gameId = game;
     const g = gameById(game);
     const nick = this.registry.get('nick') || 'Visitante';
     const settings = getSettings();
     const before = getPlays();
+    const solo = !!this.registry.get('solo'); // modo "um jogo isolado" (plano B): sem hub
+    const home = solo ? 'Attract' : 'Hub';
+
+    // Partida abandonada (nenhuma ação do jogador, ou 0 pontos em menos de 10 s): não grava, não gasta tentativa,
+    // sem código nem brinde. Só convida a jogar de novo.
+    if (acted === false || (points <= 0 && durationMs < 10000)) {
+      this.eligible = false;
+      this.play = { contact: null };
+      this.skipExit = true;
+      return this.abandoned(g, game, home, solo);
+    }
 
     // --- Registro da partida ---
     const attempts = officialAttempts(before, nick);
-    const official = attempts < settings.maxAttempts;
+    const official = attempts < settings.maxAttempts; // jogou de verdade e ainda tinha tentativa: gasta 1 e ganha código
+    const minR = minRank(settings, game);
+    const rankable = official && points >= minR; // só entra no ranking quem fez o mínimo do jogo
     const quimia = quimiaScore(points, settings.pars[game]);
     const prizes = [];
     if (official) {
       prizes.push('participacao');
-      if (points >= settings.minScores[game]) prizes.push('meta');
+      if (rankable && points >= settings.minScores[game]) prizes.push('meta');
     }
     const code = official ? generateCode(new Set(before.map((p) => p.code).filter(Boolean))) : null;
     const play = {
@@ -44,6 +57,7 @@ export default class GameOver extends BaseScene {
       ts: Date.now(),
       day: dayKey(Date.now()),
       official,
+      rankable,
       attemptNo: attempts + 1,
       code,
       prizes,
@@ -55,11 +69,11 @@ export default class GameOver extends BaseScene {
     this.play = play;
 
     const all = getPlays();
-    const posGame = official ? positionOfNick(rankGame(all, game), nick) : null;
-    const posGen = official ? positionOfNick(rankGeneral(all), nick) : null;
+    const posGame = rankable ? positionOfNick(rankGame(all, game), nick) : null;
+    const posGen = rankable ? positionOfNick(rankGeneral(all), nick) : null;
 
     // Captura de contato: só quem entrou no Top 3 do jogo ou atingiu a meta do brinde
-    this.eligible = official && ((posGame !== null && posGame <= 3) || prizes.includes('meta'));
+    this.eligible = rankable && ((posGame !== null && posGame <= 3) || prizes.includes('meta'));
 
     // --- Tela ---
     addBackground(this);
@@ -81,7 +95,11 @@ export default class GameOver extends BaseScene {
       duration: Math.min(1400, 400 + points * 40),
       onUpdate: (t) => scoreText.setText(String(Math.round(t.getValue()))),
     });
-    if (official) {
+    if (official && !rankable) {
+      T(this, 520, 505, 'Quase lá!', 'h2', { color: COLORS.cyanLight });
+      T(this, 520, 580, `Para entrar no ranking: ${minR} pontos ou mais.`, 'body', { color: COLORS.white });
+      T(this, 520, 630, 'Você ganhou o brinde de participação. Jogue de novo!', 'body', { color: COLORS.mint2 });
+    } else if (official) {
       T(this, 520, 490, `Pontuação Quimia: ${quimia}`, 'h3', { color: COLORS.neon });
       T(this, 520, 565, `#${posGame} no ${g.name}`, 'h3', { color: COLORS.white });
       T(this, 520, 625, `#${posGen} no Ranking Geral`, 'h3', { color: COLORS.mint2 });
@@ -130,8 +148,6 @@ export default class GameOver extends BaseScene {
     T(this, 960, 925, 'Quer saber mais? Pergunte pra Kemi no app Quimia (em breve).', 'caption', { color: COLORS.sky2 });
 
     // Botões
-    const solo = !!this.registry.get('solo'); // modo "um jogo isolado" (plano B): sem hub
-    const home = solo ? 'Attract' : 'Hub';
     this.btns = [
       { label: 'JOGAR DE NOVO', do: () => this.leave(g.scene, { gameId: game }) },
       { label: solo ? 'SAIR' : 'OUTRO JOGO', do: () => this.leave(home) },
@@ -144,9 +160,31 @@ export default class GameOver extends BaseScene {
     this.refresh();
   }
 
+  /** Tela para partida abandonada: sem código, sem brinde, não gastou tentativa. */
+  abandoned(g, game, home, solo) {
+    addBackground(this);
+    this.bubbles = new BubbleField(this, 18);
+    sfx.play('back');
+    T(this, 960, 150, 'Vamos de novo?', 'display', { color: COLORS.neon });
+    fitImage(this.add.image(960, 450, kemiKey(this, 'sleepy')), 340);
+    T(this, 960, 690, 'Parece que a partida nem começou de verdade.', 'h3', { color: COLORS.white });
+    T(this, 960, 760, 'Essa não gastou a sua tentativa. Bora tentar?', 'bodyL', { color: COLORS.mint2 });
+    this.btns = [
+      { label: 'JOGAR DE NOVO', do: () => this.scene.start(g.scene, { gameId: game }) },
+      { label: solo ? 'SAIR' : 'OUTRO JOGO', do: () => this.scene.start(home) },
+    ].map((b, i) => {
+      const gfx = this.add.graphics();
+      const t = T(this, 640 + i * 640, 990, b.label, 'buttonL');
+      return { ...b, gfx, t, x: 640 + i * 640 };
+    });
+    this.sel = 0;
+    this.refresh();
+  }
+
   /** Saída da tela final: contato (se elegível) → convite com 2 QR → destino. */
   leave(scene, data) {
     const next = { scene, data };
+    if (this.skipExit) return this.scene.start(scene, data); // abandonada: direto, sem contato nem convite
     if (this.eligible && !this.play.contact) this.scene.start('Contact', { playId: this.play.id, next });
     else this.scene.start('Viral', { next });
   }

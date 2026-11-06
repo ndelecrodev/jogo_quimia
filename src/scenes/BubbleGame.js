@@ -55,6 +55,7 @@ export default class BubbleGame extends BaseScene {
     // Estado
     this.points = 0;
     this.lives = LIVES;
+    this.flaps = 0; // quantas vezes o jogador apertou (para detectar partida abandonada)
     this.elapsed = 0;
     this.vy = 0;
     this.speed = BUBBLE_LEVELS[0].speed;
@@ -153,6 +154,7 @@ export default class BubbleGame extends BaseScene {
 
   // ---------- Ações ----------
   doFlap() {
+    this.flaps++;
     this.vy = FLAP;
     sfx.play('flap');
     this.tweens.killTweensOf(this.kemi);
@@ -187,7 +189,7 @@ export default class BubbleGame extends BaseScene {
     burst(this, KEMI_X, this.kemi.y, 24);
     this.kemi.setVisible(false);
     this.time.delayedCall(900, () =>
-      this.scene.start('GameOver', { game: 'bolha', points: this.points, durationMs: Math.round(this.elapsed), reason })
+      this.scene.start('GameOver', { game: 'bolha', points: this.points, durationMs: Math.round(this.elapsed), reason, acted: this.flaps >= 2 })
     );
   }
 

@@ -36,6 +36,7 @@ export default class SobeGame extends BaseScene {
     this.points = 0;
     this.height = 0;
     this.lives = LIVES;
+    this.moved = false; // o jogador mexeu a Kemi pelo menos uma vez?
     this.elapsed = 0;
     this.vy = 0;
     this.vx = 0;
@@ -178,7 +179,7 @@ export default class SobeGame extends BaseScene {
     this.kemi.setVisible(false);
     this.shieldRing.setVisible(false);
     this.time.delayedCall(900, () =>
-      this.scene.start('GameOver', { game: 'sobe', points: this.points, durationMs: Math.round(this.elapsed), reason })
+      this.scene.start('GameOver', { game: 'sobe', points: this.points, durationMs: Math.round(this.elapsed), reason, acted: this.moved })
     );
   }
 
@@ -227,6 +228,7 @@ export default class SobeGame extends BaseScene {
     }
 
     // Movimento horizontal com wrap lateral
+    if (Math.abs(input.axisX()) > 0.1) this.moved = true;
     const target = input.axisX() * SPEED_X;
     this.vx += (target - this.vx) * Math.min(1, dt * 10);
     this.kemi.x += this.vx * dt;
