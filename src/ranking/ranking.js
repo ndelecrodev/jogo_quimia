@@ -1,6 +1,7 @@
 // Tela da TV (/ranking): Top 10 ao vivo, alterna Geral e jogos. Atualiza quando a janela do jogo grava algo.
-import { getPlays, getSettings, onChange } from '../core/Storage.js';
-import { rankGeneral, rankGame } from '../core/Ranking.js';
+import { getSettings, onChange } from '../core/Storage.js';
+import { generalRanking, gameRanking } from '../core/RankingSource.js';
+import { Cloud } from '../core/Cloud.js';
 import { championText } from '../core/clock.js';
 import { GAMES } from '../config/games.js';
 
@@ -21,9 +22,8 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 function render() {
   const bs = boards();
   const b = bs[idx % bs.length];
-  const plays = getPlays();
   const general = b.id === 'general';
-  const list = (general ? rankGeneral(plays) : rankGame(plays, b.id)).slice(0, 10);
+  const list = (general ? generalRanking() : gameRanking(b.id)).slice(0, 10);
   titleEl.textContent = b.name;
   listEl.innerHTML = list.length
     ? list
@@ -55,3 +55,7 @@ tick();
 setInterval(tick, 1000);
 setInterval(rotate, 8000);
 onChange(render);
+
+// Nuvem (opcional): Realtime + polling a cada 10 s; sem conexão, continua mostrando o ranking local/em cache.
+Cloud.on('ranking', render);
+Cloud.start({ realtime: true }).catch(() => {});

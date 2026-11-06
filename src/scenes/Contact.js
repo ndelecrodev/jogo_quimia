@@ -6,7 +6,7 @@ import { sfx } from '../core/Sfx.js';
 import { updatePlay } from '../core/Storage.js';
 
 const MAX_LEN = 40;
-const LGPD = 'Aceito ser contatado pela Quimia sobre o brinde (LGPD). Posso pedir a exclusão a qualquer momento.';
+const LGPD = 'Aceito que a Quimia guarde meu contato para falar sobre o brinde (LGPD). Posso pedir a exclusão.';
 
 // Captura de contato (só quem entrou no Top 3 do jogo ou atingiu a meta do brinde). Opcional, com aceite LGPD.
 export default class Contact extends BaseScene {

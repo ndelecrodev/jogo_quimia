@@ -24,6 +24,31 @@ export function compareGame(a, b) {
   return a.ts - b.ts;
 }
 
+/** Linha do ranking público da nuvem (ranking_public) → formato de partida local. */
+export function remoteToPlay(r) {
+  return {
+    id: r.id,
+    nick: r.nick,
+    game: r.game,
+    points: Number(r.points) || 0,
+    quimia: Number(r.quimia) || 0,
+    durationMs: Number(r.duration_ms) || 0,
+    ts: Date.parse(r.played_at) || 0,
+    day: r.day,
+    official: r.official !== false,
+    rankable: true,
+    remote: true,
+  };
+}
+
+/** Junta as partidas locais com as linhas do ranking da nuvem, sem duplicar (o mesmo id vale uma vez; o local prevalece). */
+export function mergePlays(local, remoteRows) {
+  const m = new Map();
+  for (const r of remoteRows || []) if (r && r.id) m.set(r.id, remoteToPlay(r));
+  for (const p of local || []) m.set(p.id, p);
+  return [...m.values()];
+}
+
 export function dayKey(ts) {
   const d = new Date(ts);
   const p = (n) => String(n).padStart(2, '0');

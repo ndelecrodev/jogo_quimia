@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Roda os testes de tests/*.test.js direto no navegador, SEM Node. Abra pelo servir.py ou hospedado. -->
+<!-- Roda os testes de tests/*.test.js direto no navegador, SEM Node (cloud.test.js só roda aqui). Abra pelo servir.py ou hospedado. -->
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
@@ -20,11 +20,17 @@
     <ul id="lista"></ul>
     <script type="module">
       // Mini executor com os mesmos nomes do Vitest (describe, it, expect) para os arquivos de tests/.
-      const ARQUIVOS = ['./tests/ranking.test.js', './tests/difficulty.test.js'];
+      const ARQUIVOS = ['./tests/ranking.test.js', './tests/difficulty.test.js', './tests/cloud.test.js'];
       const SHIM = `
-const __r = { ok: [], falhas: [] }; let __suite = '';
+const __r = { ok: [], falhas: [] }; const __fila = []; let __suite = '';
 export const describe = (n, f) => { __suite = n; f(); };
-export const it = (n, f) => { try { f(); __r.ok.push(__suite + ' > ' + n); } catch (e) { __r.falhas.push(__suite + ' > ' + n + ': ' + e.message); } };
+export const it = (n, f) => { __fila.push([__suite, n, f]); };
+export const __rodar = async () => {
+  for (const [s, n, f] of __fila) {
+    try { await f(); __r.ok.push(s + ' > ' + n); } catch (e) { __r.falhas.push(s + ' > ' + n + ': ' + e.message); }
+  }
+  return __r;
+};
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const J = (x) => JSON.stringify(x);
 export const expect = (v) => ({
@@ -38,7 +44,6 @@ export const expect = (v) => ({
   toBeGreaterThanOrEqual: (x) => { if (!(v >= x)) throw new Error(v + ' não é >= ' + x); },
   toMatchObject: (x) => { if (!Object.keys(x).every((k) => v[k] === x[k])) throw new Error('objeto não bate: ' + J(v) + ' vs ' + J(x)); },
 });
-export const __resultado = () => __r;
 `;
       const lista = document.getElementById('lista');
       let total = 0, falhas = 0;
@@ -47,7 +52,7 @@ export const __resultado = () => __r;
           let src = await (await fetch(arq)).text();
           src = src.replace(/import \{[^}]*\} from 'vitest';/, '').replace(/from '\.\.\/src\//g, `from '${new URL('./src/', location.href).href}`);
           const url = URL.createObjectURL(new Blob([SHIM + '\n' + src], { type: 'text/javascript' }));
-          const r = (await import(url)).__resultado();
+          const r = await (await import(url)).__rodar();
           total += r.ok.length + r.falhas.length;
           falhas += r.falhas.length;
           r.ok.forEach((n) => (lista.innerHTML += `<li class="ok">✓ ${n}</li>`));

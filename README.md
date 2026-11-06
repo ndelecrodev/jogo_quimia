@@ -28,6 +28,7 @@ Cada partida termina por 3 vidas ou 120 s. A dificuldade sobe por pontos, não p
 - Só entra no ranking quem jogou de verdade e fez o mínimo do jogo; partida parada não gasta tentativa.
 - Acessibilidade: textos grandes, contraste AA e opção de reduzir efeitos de piscar.
 - Funciona offline depois de aberto uma vez (service worker) e mostra o nome do controle detectado; **F3** mostra os FPS.
+- **Nuvem opcional (Supabase):** ranking compartilhado entre estações e TV, backup de partidas e contatos e admin remoto, sempre offline-first (fila de envio, sem duplicar). Vem desligada. Guia: [SUPABASE.md](SUPABASE.md).
 
 ## Como rodar
 
@@ -75,6 +76,7 @@ src/config/                dificuldade, brindes, evento, misturas, fatos
 src/admin/                 painel admin
 assets/                    manifest.json e imagens da Kemi
 vendor/, fonts/            Phaser, gerador de QR e fontes locais
+supabase/                  SQL do Supabase (schema, verificar, desfazer, limpar)
 scripts/                   importador de misturas, recorte da Kemi, gerador do sw.js
 tests/ e testes.html      testes (Vitest, ou no navegador sem Node)
 ```
@@ -102,7 +104,7 @@ Tudo fica no `localStorage` do navegador; não há servidor. O apelido aparece n
 
 ## Status
 
-Guia do stand em [LEIA-ME_FEIRA.md](LEIA-ME_FEIRA.md), checklist em [CHECKLIST_FEIRA.md](CHECKLIST_FEIRA.md) pendências em [PENDENCIAS.md](PENDENCIAS.md) e arte pendente em [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md).
+Guia do stand em [LEIA-ME_FEIRA.md](LEIA-ME_FEIRA.md), checklist em [CHECKLIST_FEIRA.md](CHECKLIST_FEIRA.md) nuvem em [SUPABASE.md](SUPABASE.md), pendências em [PENDENCIAS.md](PENDENCIAS.md) e arte pendente em [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md).
 
 ## Licença
 

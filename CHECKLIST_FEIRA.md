@@ -47,3 +47,16 @@ Marque cada item. Faça a parte "Véspera" com tudo montado como será no stand.
 - [ ] Se houver mais de uma estação: importar os JSON na principal.
 - [ ] Brindes entregues x códigos: conferir no admin.
 - [ ] Contatos coletados: guardar com cuidado e só usar para o que foi avisado (LGPD).
+
+## Nuvem (Supabase) — só se for usar
+- [ ] SQL colado (blocos 1 a 5) e **`verificar.sql` com todas as linhas `ok = true`**.
+- [ ] PIN da nuvem definido (6+ dígitos) e anotado só com a equipe.
+- [ ] URL e chave **anon** no `supabase.runtime.js` (**nunca a service_role**) e `enabled: true`; site publicado.
+- [ ] Cada computador com **código de estação** diferente (E1, E2…).
+- [ ] Jogou uma partida e ela apareceu em `plays` e `ranking_public` (Supabase > Table Editor).
+- [ ] **Teste do Wi-Fi:** desligou o Wi-Fi, jogou 3 partidas, religou: as 3 chegaram, sem duplicar.
+- [ ] A TV (`ranking.html`) mostra o ranking das duas estações e continua mostrando sem internet.
+- [ ] Admin > Nuvem: entrou com o PIN, marcou entrega, exportou o CSV, apagou um contato.
+- [ ] **Zerou tudo**: admin local **e** "Zerar TUDO na nuvem". A TV mostra "Seja o primeiro do ranking!".
+- [ ] Sabe fazer o **plano B** (desligar a nuvem em 1 minuto).
+- [ ] No encerramento: CSV exportado e guardado em 2 lugares, depois `limpar_apos_evento.sql` (LGPD).

@@ -1,6 +1,7 @@
 // Painel admin oculto (Ctrl+Shift+A + PIN). Para a equipe do stand: conferir código de resgate,
 // marcar brinde entregue, exportar/importar dados, calibrar metas, zerar para abrir a feira e ajustar o evento.
-import { getPlays, getSettings, setSettings, updatePlay, deletePlay, replacePlays, clearAllPlays } from '../core/Storage.js';
+import { getPlays, getSettings, setSettings, updatePlay, deletePlay, replacePlays, clearAllPlays, readOutbox, writeOutbox } from '../core/Storage.js';
+import { Cloud } from '../core/Cloud.js';
 import { rankGeneral, dayKey, minRank } from '../core/Ranking.js';
 import { GAMES, gameById } from '../config/games.js';
 import { sfx } from '../core/Sfx.js';
@@ -64,6 +65,9 @@ function show() {
 
 function close() {
   isOpen = false;
+  cloudPin = null; // o PIN da nuvem nunca fica guardado: sai da memória ao fechar o painel
+  cloudRows = null;
+  cloudMsg = '';
   if (root) root.style.display = 'none';
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
 }
@@ -148,6 +152,9 @@ function renderMain() {
     <div id="pend"></div>
     <div class="stats" id="stats"></div>
 
+    <h2>Nuvem (Supabase)</h2>
+    <div class="card" id="cloud"></div>
+
     <h2>Buscar código de resgate</h2>
     <div class="card"><input type="text" id="filter" placeholder="Código (ex.: K7P2), apelido ou jogo" value="${esc(filter)}" style="width:min(420px,100%)">
       <div id="found"></div></div>
@@ -187,6 +194,7 @@ function renderMain() {
         <label>Hashtag (ex.: #QuimiaArcade)<input type="text" id="hashtag" value="${esc(s.hashtag)}"></label>
         <label>Link do QR "Para você" (https://…)<input type="text" id="urlUser" value="${esc(s.urlUser)}"></label>
         <label>Link do QR "Para empresas" (https://…)<input type="text" id="urlCompany" value="${esc(s.urlCompany)}"></label>
+        <label>Código desta estação (ex.: E1, E2)<input type="text" id="stationId" maxlength="6" value="${esc(s.stationId)}"></label>
         <label>Novo PIN (vazio = manter)<input type="password" id="newPin" autocomplete="off"></label>
       </div>
       <h2 style="margin-top:16px">Jogos no hub e opções</h2>
@@ -202,6 +210,7 @@ function renderMain() {
   renderStats();
   renderTable();
   renderCalib();
+  renderCloud();
 }
 
 function renderPend() {
@@ -317,6 +326,7 @@ function onClick(e) {
   else if (act === 'wipego') wipeEverything();
   else if (act === 'wipecancel') root.querySelector('#wipeBox').innerHTML = '';
   else if (act === 'usesug') useSuggestion(b.dataset.game);
+  else if (act.startsWith('cloud-')) cloudAction(act, b);
   else if (act === 'save') saveSettings();
 }
 
@@ -402,7 +412,7 @@ function renderWipe() {
   const n = getPlays().length;
   root.querySelector('#wipeBox').innerHTML = `<div class="card alert">
     <b>Zerar tudo para abrir a feira</b><br>
-    Apaga TODAS as ${n} partida(s), contatos, códigos de resgate e o backup automático deste navegador. As configurações ficam.<br>
+    Apaga TODAS as ${n} partida(s), contatos, códigos de resgate, a fila de envio e o backup automático deste navegador. As configurações ficam.${Cloud.enabled() ? '<br><b>A nuvem não é afetada:</b> para limpá-la use a seção Nuvem > "Zerar TUDO na nuvem".' : ''}<br>
     <label class="chk" style="margin:8px 0"><input type="checkbox" id="wipeBackup" checked> Baixar um backup JSON antes de apagar</label>
     <input type="password" id="wipePin" placeholder="Digite o PIN para confirmar" autocomplete="off">
     <button class="danger" data-act="wipego">Apagar tudo</button> <button class="sec" data-act="wipecancel">Cancelar</button>
@@ -453,6 +463,8 @@ function saveSettings() {
   for (const [nome, u] of [['Para você', urlUser], ['Para empresas', urlCompany]]) {
     if (u && !isRealUrl(u)) return (msg.textContent = `Link do QR "${nome}": use um endereço real começando com https:// (não vale exemplo/localhost). Vazio mostra "Em breve".`);
   }
+  const stationId = v('stationId').value.trim().toUpperCase();
+  if (!/^[A-Z0-9]{1,6}$/.test(stationId)) return (msg.textContent = 'Código da estação: de 1 a 6 letras ou números (ex.: E1).');
   const newPin = v('newPin').value;
   if (newPin && newPin.length < 4) return (msg.textContent = 'O novo PIN precisa ter pelo menos 4 caracteres.');
   const enabledGames = GAMES.filter((g) => v(`en_${g.id}`).checked).map((g) => g.id);
@@ -465,7 +477,7 @@ function saveSettings() {
     minScores, pars, minRank: minRankObj, enabledGames, eventEnd, maxAttempts, maxTimeMs: maxTimeSec * 1000,
     prizes: { participacao: v('prize_participacao').value.trim(), meta: v('prize_meta').value.trim(), master: v('prize_master').value.trim() },
     instagram: v('instagram').value.trim(), hashtag: v('hashtag').value.trim(), urlUser, urlCompany,
-    muted: v('muted').checked, reduceFlash: v('reduceFlash').checked,
+    muted: v('muted').checked, reduceFlash: v('reduceFlash').checked, stationId,
   };
   const finish = () => {
     setSettings(patch);
@@ -480,6 +492,256 @@ function saveSettings() {
   };
   if (newPin) hashPin(newPin).then((h) => { patch.adminPinHash = h; patch.adminPin = null; finish(); });
   else finish();
+}
+
+
+// ======================= NUVEM (Supabase) =======================
+// O PIN da nuvem é conferido NO SERVIDOR (funções admin_*). Aqui ele só fica na memória enquanto o painel está aberto.
+let cloudPin = null;
+let cloudRows = null;
+let cloudMsg = '';
+
+async function cloudCall(fn, body) {
+  try {
+    const r = await Cloud.rpc(fn, body);
+    if (!r.ok) return { ok: false, error: `http_${r.status}` };
+    return r.json && typeof r.json === 'object' ? r.json : { ok: false, error: 'resposta_invalida' };
+  } catch (e) {
+    return { ok: false, error: 'sem_conexao' };
+  }
+}
+
+function cloudErr(e) {
+  const t = {
+    acesso_negado: 'PIN da nuvem incorreto, ou bloqueado por 60 s depois de 5 erros seguidos.',
+    sem_conexao: 'Sem conexão com a nuvem agora. Tente de novo quando a internet voltar.',
+    pin_invalido: 'O PIN da nuvem precisa ter 6 ou mais DÍGITOS.',
+    codigo_nao_encontrado: 'Código não encontrado na nuvem (a partida já chegou lá? veja "pendentes").',
+    codigo_duplicado: 'Esse código existe em mais de uma estação; use o botão da linha da lista.',
+    resposta_invalida: 'Resposta inesperada da nuvem.',
+  }[e];
+  if (t) return t;
+  if (String(e).startsWith('http_')) return `A nuvem respondeu ${String(e).slice(5)}. Confira se o SQL do SUPABASE.md foi colado e se URL/chave estão certas.`;
+  return String(e);
+}
+
+// Janelinha para pedir o PIN (confirmação das ações destrutivas). Devolve o PIN digitado ou null.
+function askPin(texto) {
+  return new Promise((resolve) => {
+    const m = document.createElement('div');
+    m.className = 'modal';
+    m.innerHTML = `<div class="card"><p>${esc(texto)}</p><input type="password" id="mpin" placeholder="PIN da nuvem" autocomplete="off">
+      <p><button data-m="ok">Confirmar</button> <button class="sec" data-m="no">Cancelar</button></p></div>`;
+    root.appendChild(m);
+    const inp = m.querySelector('#mpin');
+    inp.focus();
+    const fim = (v) => {
+      m.remove();
+      resolve(v);
+    };
+    m.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-m]');
+      if (b) fim(b.dataset.m === 'ok' ? inp.value : null);
+    });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') fim(inp.value);
+    });
+  });
+}
+
+function renderCloud() {
+  const box = root && root.querySelector('#cloud');
+  if (!box) return;
+  if (!Cloud.enabled()) {
+    box.innerHTML = '<b>Nuvem desligada.</b> O jogo funciona normalmente, só com o modo local. Para ligar, preencha a URL e a chave "anon" (veja o SUPABASE.md).';
+    return;
+  }
+  const st = Cloud.status();
+  const cabeca = `<div class="bar" style="justify-content:flex-start;gap:12px"><b>${esc(Cloud.statusText())}</b>
+      <span>estação <b>${esc(getSettings().stationId)}</b></span>
+      ${st.lastOkAt ? `<span>último envio: ${esc(fmtDate(st.lastOkAt))}</span>` : ''}
+      ${st.lastError ? `<span class="err">${esc(st.lastError)}</span>` : ''}</div>
+    <p><button data-act="cloud-flush">Enviar pendentes agora (${st.pending})</button>
+       <button class="sec" data-act="cloud-resend">Reenviar todas as partidas deste computador</button></p>`;
+  if (!cloudPin) {
+    box.innerHTML = `${cabeca}
+      <p>Para ver e mexer nos dados da nuvem (todas as estações), digite o <b>PIN da nuvem</b> (6+ dígitos):</p>
+      <input type="password" id="cloudPin" placeholder="PIN da nuvem" autocomplete="off">
+      <button data-act="cloud-login">Entrar na nuvem</button>
+      <button class="sec" data-act="cloud-setpin">Definir / trocar PIN da nuvem</button>
+      <div class="err">${esc(cloudMsg)}</div>`;
+    return;
+  }
+  const s = getSettings();
+  const rows = (cloudRows || []).slice(0, 200).map(
+    (p) => `<tr class="${p.official ? 'ok' : 'train'}">
+      <td>${esc(fmtDate(p.played_at))}</td><td>${esc(p.station_id || '—')}</td><td>${esc(p.nick)}</td><td>${esc(gameName(p.game))}</td>
+      <td>${p.points}</td><td><b>${esc(p.code || '—')}</b></td>
+      <td>${p.official && p.code ? `<button class="small ${p.delivered ? 'sec' : ''}" data-act="cloud-deliver" data-code="${esc(p.code)}" data-station="${esc(p.station_id || '')}" data-id="${esc(p.id)}" data-to="${p.delivered ? '0' : '1'}">${p.delivered ? 'Entregue ✓' : 'Marcar entregue'}</button>` : '—'}</td>
+      <td>${p.contact ? `${esc(p.contact)}${p.company ? '<span class="tag">empresa</span>' : ''} <button class="small danger" data-act="cloud-delcontact" data-id="${esc(p.id)}">Apagar contato</button>` : '—'}</td>
+      <td><button class="small danger" data-act="cloud-delplay" data-id="${esc(p.id)}">Apagar partida</button></td></tr>`
+  );
+  box.innerHTML = `${cabeca}
+    <p style="color:#1EEE97">Conectado à nuvem: ${cloudRows ? cloudRows.length : 0} partida(s) de todas as estações.</p>
+    <p><button data-act="cloud-refresh">Atualizar lista</button>
+       <button data-act="cloud-csv">Exportar CSV (nuvem + local)</button>
+       <button class="danger" data-act="cloud-resetday">Zerar o dia na nuvem</button>
+       <button class="danger" data-act="cloud-resetall">Zerar TUDO na nuvem</button>
+       <button class="sec" data-act="cloud-setpin">Trocar PIN da nuvem</button>
+       <button class="sec" data-act="cloud-logout">Sair da nuvem</button></p>
+    <div class="err">${esc(cloudMsg)}</div>
+    <table><tr><th>Data</th><th>Estação</th><th>Apelido</th><th>Jogo</th><th>Pontos</th><th>Código</th><th>Entrega</th><th>Contato</th><th></th></tr>${rows.join('')}</table>
+    <div style="color:#54A8B1;margin-top:6px">Brindes: ${esc(s.prizes.participacao)} · ${esc(s.prizes.meta)} · ${esc(s.prizes.master)}</div>`;
+}
+
+async function cloudLogin() {
+  const pin = root.querySelector('#cloudPin').value;
+  cloudMsg = 'Entrando…';
+  renderCloud();
+  const r = await cloudCall('admin_list', { p_pin: pin, p_day: null });
+  if (r.ok) {
+    cloudPin = pin;
+    cloudRows = r.data || [];
+    cloudMsg = '';
+  } else {
+    cloudMsg = cloudErr(r.error);
+  }
+  renderCloud();
+}
+
+async function cloudRefresh() {
+  const r = await cloudCall('admin_list', { p_pin: cloudPin, p_day: null });
+  if (r.ok) {
+    cloudRows = r.data || [];
+    cloudMsg = '';
+  } else {
+    cloudMsg = cloudErr(r.error);
+    if (r.error === 'acesso_negado') cloudPin = null;
+  }
+  renderCloud();
+}
+
+// Ação destrutiva: pede o PIN de novo e confirma no servidor
+async function cloudDestructive(texto, fn, extra, depois) {
+  const pin = await askPin(texto);
+  if (pin === null) return;
+  const r = await cloudCall(fn, { p_pin: pin, ...extra });
+  if (!r.ok) {
+    cloudMsg = cloudErr(r.error);
+    return renderCloud();
+  }
+  cloudMsg = '';
+  if (depois) depois(r);
+  await cloudRefresh();
+  Cloud.refreshRanking();
+}
+
+async function cloudDeliver(b) {
+  const to = b.dataset.to === '1';
+  const r = await cloudCall('admin_mark_delivered', { p_pin: cloudPin, p_code: b.dataset.code, p_delivered: to, p_station: b.dataset.station || null });
+  if (!r.ok) cloudMsg = cloudErr(r.error);
+  else {
+    cloudMsg = '';
+    const row = (cloudRows || []).find((x) => x.id === b.dataset.id);
+    if (row) row.delivered = to;
+    updatePlay(b.dataset.id, { delivered: to, deliveredAt: to ? Date.now() : null }); // espelha neste computador, se a partida for daqui
+  }
+  renderCloud();
+}
+
+function cloudSetPin() {
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="card"><p><b>PIN da nuvem</b> (6 ou mais DÍGITOS)</p>
+    <input type="password" id="pinOld" placeholder="PIN atual (vazio se for o primeiro)" autocomplete="off"><br>
+    <input type="password" id="pinNew" placeholder="Novo PIN" autocomplete="off" style="margin-top:8px"><br>
+    <p class="err" id="pinMsg"></p>
+    <p><button data-m="ok">Salvar</button> <button class="sec" data-m="no">Cancelar</button></p>
+    <p style="color:#54A8B1;font-size:13px">A PRIMEIRA definição do PIN é feita pelo SQL Editor do Supabase (veja o SUPABASE.md): por segurança, o navegador não consegue criar o primeiro PIN.</p></div>`;
+  root.appendChild(m);
+  m.querySelector('#pinOld').focus();
+  m.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-m]');
+    if (!b) return;
+    if (b.dataset.m === 'no') return m.remove();
+    const novo = m.querySelector('#pinNew').value;
+    const velho = m.querySelector('#pinOld').value;
+    const r = await cloudCall('admin_set_pin', { p_new: novo, p_old: velho || null });
+    if (r.ok) {
+      cloudPin = novo;
+      m.remove();
+      cloudMsg = 'PIN da nuvem alterado.';
+      await cloudRefresh();
+    } else {
+      m.querySelector('#pinMsg').textContent = cloudErr(r.error);
+    }
+  });
+}
+
+// CSV com nuvem + local, sem duplicar (mesmo id = uma linha)
+function exportCsvMerged() {
+  const s = getSettings();
+  const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const map = new Map();
+  for (const p of cloudRows || []) {
+    map.set(p.id, {
+      id: p.id, nick: p.nick, game: p.game, points: p.points, quimia: p.quimia, official: p.official, ts: Date.parse(p.played_at) || 0,
+      code: p.code, prizes: p.prizes || [], delivered: p.delivered, contact: p.contact, contactType: p.contact_type, consent: p.consent, company: p.company, station: p.station_id,
+    });
+  }
+  for (const p of getPlays()) {
+    const c = map.get(p.id) || {};
+    map.set(p.id, {
+      id: p.id, nick: p.nick, game: p.game, points: p.points, quimia: p.quimia, official: p.official, ts: p.ts, code: p.code, prizes: p.prizes || [],
+      delivered: !!(c.delivered || p.delivered), contact: c.contact || p.contact, contactType: c.contactType || p.contactType,
+      consent: c.consent ?? p.consent, company: c.company ?? p.company, station: c.station || s.stationId,
+    });
+  }
+  const head = ['apelido', 'jogo', 'pontos', 'pontuacao_quimia', 'oficial', 'data_hora', 'codigo', 'brindes', 'entregue', 'contato', 'tipo_contato', 'consentimento_lgpd', 'empresa', 'estacao', 'id'];
+  const lines = [...map.values()]
+    .sort((a, b) => a.ts - b.ts)
+    .map((p) =>
+      [p.nick, gameName(p.game), p.points, p.quimia, p.official ? 'sim' : 'nao', new Date(p.ts).toLocaleString('pt-BR'), p.code || '',
+        (p.prizes || []).map((k) => s.prizes[k]).join(' + '), p.delivered ? 'sim' : 'nao', p.contact || '', p.contactType || '', p.consent ? 'sim' : 'nao', p.company ? 'sim' : 'nao', p.station || '', p.id].map(q).join(';')
+    );
+  download(`quimia-arcade-nuvem-${stamp()}.csv`, '﻿' + [head.join(';'), ...lines].join('\r\n'), 'text/csv;charset=utf-8');
+}
+
+async function cloudAction(act, b) {
+  if (act === 'cloud-flush') {
+    await Cloud.flushNow();
+    renderCloud();
+  } else if (act === 'cloud-resend') {
+    const n = Cloud.enqueueAllLocal();
+    cloudMsg = `${n} partida(s) deste computador colocadas na fila de envio.`;
+    renderCloud();
+  } else if (act === 'cloud-login') await cloudLogin();
+  else if (act === 'cloud-refresh') await cloudRefresh();
+  else if (act === 'cloud-logout') {
+    cloudPin = null;
+    cloudRows = null;
+    cloudMsg = '';
+    renderCloud();
+  } else if (act === 'cloud-setpin') cloudSetPin();
+  else if (act === 'cloud-csv') {
+    await cloudRefresh();
+    exportCsvMerged();
+  } else if (act === 'cloud-deliver') await cloudDeliver(b);
+  else if (act === 'cloud-delcontact') {
+    const id = b.dataset.id;
+    await cloudDestructive('Apagar o CONTATO desta partida na nuvem (LGPD). Digite o PIN da nuvem para confirmar.', 'admin_delete_contact', { p_play_id: id }, () => {
+      writeOutbox(readOutbox().filter((x) => !(x.k === 'contact' && x.id === id)));
+      const p = getPlays().find((x) => x.id === id);
+      if (p && p.contact) updatePlay(id, { contact: null, contactType: null, consent: false });
+    });
+  } else if (act === 'cloud-delplay') {
+    const id = b.dataset.id;
+    await cloudDestructive('Apagar a PARTIDA (e o contato) na nuvem. Digite o PIN da nuvem para confirmar.', 'admin_delete_play', { p_play_id: id }, () => deletePlay(id));
+  } else if (act === 'cloud-resetday') {
+    await cloudDestructive(`Zerar na nuvem TODAS as partidas de HOJE (${dayKey(Date.now())}), de todas as estações. Digite o PIN da nuvem para confirmar.`, 'admin_reset_day', { p_day: dayKey(Date.now()) });
+  } else if (act === 'cloud-resetall') {
+    await cloudDestructive('Zerar na nuvem TUDO: partidas, contatos e ranking de todas as estações. Digite o PIN da nuvem para confirmar.', 'admin_reset_all', {});
+  }
 }
 
 // Arquivo escolhido no "Importar JSON"/"Restaurar"

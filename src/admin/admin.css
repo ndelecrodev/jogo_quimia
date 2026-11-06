@@ -35,3 +35,6 @@
 #admin .alert ul { margin: 6px 0 0 18px; padding: 0; }
 #admin .alert .where { color: #88ECE5; font-size: 13px; }
 #admin .okbox { border-color: #1EEE97; background: rgba(30,238,151,.1); }
+#admin .modal { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.72); }
+#admin .modal .card { max-width: 460px; width: 92%; text-align: center; }
+#admin .modal input { width: 100%; font-size: 18px; text-align: center; }

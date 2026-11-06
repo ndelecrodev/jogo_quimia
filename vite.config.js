@@ -20,6 +20,8 @@ export default defineConfig({
       configurePreviewServer: (s) => s.middlewares.use(rewriteRanking),
     },
   ],
+  // cloud.test.js usa o navegador (localStorage/window): roda em testes.html, não no Node
+  test: { exclude: ['**/node_modules/**', 'tests/cloud.test.js'] },
   build: {
     chunkSizeWarningLimit: 2000,
     rollupOptions: {

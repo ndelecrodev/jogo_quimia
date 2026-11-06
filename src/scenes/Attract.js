@@ -3,8 +3,9 @@ import { COLORS, hex } from '../theme.js';
 import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage, reduceFx } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
-import { getPlays, getSettings } from '../core/Storage.js';
-import { rankGeneral, rankGame } from '../core/Ranking.js';
+import { getSettings } from '../core/Storage.js';
+import { generalRanking, gameRanking } from '../core/RankingSource.js';
+import { Cloud } from '../core/Cloud.js';
 import { championText } from '../core/clock.js';
 import { GAMES } from '../config/games.js';
 
@@ -45,6 +46,15 @@ export default class Attract extends BaseScene {
     this.updateCountdown();
     this.time.addEvent({ delay: 1000, loop: true, callback: () => this.updateCountdown() });
 
+    // Indicador discreto da nuvem (só aparece se a nuvem estiver configurada)
+    this.cloudText = T(this, 30, 1058, '', 'caption', { origin: [0, 0.5], color: COLORS.sky2, depth: 6 }).setAlpha(0.7);
+    const atualizaNuvem = () => this.cloudText.setText(Cloud.statusText());
+    atualizaNuvem();
+    this.time.addEvent({ delay: 2000, loop: true, callback: atualizaNuvem });
+    // ranking novo da nuvem: redesenha o painel
+    const offRank = Cloud.on('ranking', () => this.scene.isActive() && this.renderBoard());
+    this.events.once('shutdown', offRank);
+
     // Chamada principal
     this.cta = T(this, 960, 960, 'APERTE  ESPAÇO  ou  ✕  PARA JOGAR', 'h1', { color: COLORS.white, depth: 6 });
     if (!reduceFx()) this.tweens.add({ targets: this.cta, alpha: 0.35, duration: 700, yoyo: true, repeat: -1 });
@@ -72,9 +82,8 @@ export default class Attract extends BaseScene {
   renderBoard() {
     this.panel.removeAll(true);
     const b = this.boards()[this.boardIdx % this.boards().length];
-    const plays = getPlays();
     const isGeneral = b.id === 'general';
-    const list = (isGeneral ? rankGeneral(plays) : rankGame(plays, b.id)).slice(0, 5);
+    const list = (isGeneral ? generalRanking() : gameRanking(b.id)).slice(0, 5);
     this.panel.add(T(this, 0, 60, `TOP 5 · ${b.name.toUpperCase()}`, 'h2', { color: COLORS.neon }));
     if (!list.length) {
       this.panel.add(T(this, 0, 330, 'Seja o primeiro do ranking!', 'h3', { color: COLORS.mint2 }));

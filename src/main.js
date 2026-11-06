@@ -7,6 +7,7 @@ import { sfx } from './core/Sfx.js';
 import { getSettings, setSettings, logError } from './core/Storage.js';
 import { toggleAdmin } from './admin/admin.js';
 import { GAMES } from './config/games.js';
+import { Cloud } from './core/Cloud.js';
 
 import Boot from './scenes/Boot.js';
 import Attract from './scenes/Attract.js';
@@ -35,6 +36,9 @@ const game = new Phaser.Game({
 });
 
 sfx.setMuted(getSettings().muted);
+
+// Nuvem opcional (Supabase): sem configuração não faz nada; com falha de rede, o jogo segue normal.
+Cloud.start().catch(() => {});
 
 // ---- Plano B: index.html?jogo=bolha | misturar | sobe abre só aquele jogo (sem hub) ----
 const solo = new URLSearchParams(location.search).get('jogo');

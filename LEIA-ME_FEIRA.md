@@ -88,3 +88,11 @@ O contato só é pedido a quem entra no Top 3 ou atinge a meta, é **opcional** 
 
 ## Antes de abrir o stand
 Veja o `PENDENCIAS.md` (o que preencher e onde) e o `CHECKLIST_FEIRA.md`. Resumo: links dos 2 QR, Instagram, hashtag, hora do campeão, nomes dos brindes, PIN, **validar os pares do Pode Misturar? com as FDS** e **zerar tudo para abrir a feira**.
+
+## Nuvem (Supabase), se estiver ligada
+- No admin (`Ctrl + Shift + A`), a seção **Nuvem** mostra `☁ sincronizado` ou `☁ sem conexão (N pendentes)`. Na tela de atração aparece o mesmo, bem pequeno no canto.
+- **Sem internet o jogo funciona normal**: as partidas ficam numa fila e seguem para a nuvem quando a internet voltar (ou clique em **Enviar pendentes agora**). Não duplica.
+- Cada computador de jogo precisa de um **código de estação** diferente (admin > Configurações: E1, E2…).
+- O PIN da nuvem é separado do PIN do painel. 5 erros bloqueiam por 60 s.
+- **Zerar para abrir a feira:** faça no admin local **e** em Nuvem > "Zerar TUDO na nuvem".
+- **Plano B (1 minuto):** desligar a nuvem = esvaziar `url` e `anonKey` em `src/config/supabase.runtime.js` (`enabled: false`), commit e push. O jogo volta ao modo local. Passo a passo e solução de problemas: `SUPABASE.md`.

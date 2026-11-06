@@ -5,7 +5,8 @@ import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage } from '../u
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { addPlay, getPlays, getSettings } from '../core/Storage.js';
-import { quimiaScore, rankGame, rankGeneral, positionOfNick, officialAttempts, generateCode, dayKey, minRank } from '../core/Ranking.js';
+import { gameRanking, generalRanking } from '../core/RankingSource.js';
+import { quimiaScore, positionOfNick, officialAttempts, generateCode, dayKey, minRank } from '../core/Ranking.js';
 import { gameById } from '../config/games.js';
 import { FATOS } from '../config/fatos.js';
 
@@ -68,9 +69,9 @@ export default class GameOver extends BaseScene {
     addPlay(play);
     this.play = play;
 
-    const all = getPlays();
-    const posGame = rankable ? positionOfNick(rankGame(all, game), nick) : null;
-    const posGen = rankable ? positionOfNick(rankGeneral(all), nick) : null;
+    // posições: partidas locais + ranking da nuvem em cache (sem nuvem, só o local, como sempre)
+    const posGame = rankable ? positionOfNick(gameRanking(game), nick) : null;
+    const posGen = rankable ? positionOfNick(generalRanking(), nick) : null;
 
     // Captura de contato: só quem entrou no Top 3 do jogo ou atingiu a meta do brinde
     this.eligible = rankable && ((posGame !== null && posGame <= 3) || prizes.includes('meta'));

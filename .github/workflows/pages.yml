@@ -1,0 +1,68 @@
+# Publicação OPCIONAL no GitHub Pages que gera a configuração do Supabase a partir das "Variables" do repositório.
+#
+# ATENÇÃO: este workflow SÓ FUNCIONA se em Settings > Pages > "Build and deployment" > Source estiver "GitHub Actions".
+# Se o Pages estiver em "Deploy from a branch" (o padrão atual do projeto), IGNORE este arquivo: ele não roda sozinho
+# (só dispara pelo botão "Run workflow") e não atrapalha a publicação de sempre. Nesse caso a nuvem é ligada editando
+# src/config/supabase.runtime.js (veja o SUPABASE.md, "Opção A").
+#
+# Variables (Settings > Secrets and variables > Actions > aba Variables):
+#   SUPABASE_URL       ex.: https://abcdefghijk.supabase.co
+#   SUPABASE_ANON_KEY  a chave "anon public" (é pública por desenho; NUNCA cadastre a service_role)
+# Variables vazias = nuvem DESLIGADA (modo local puro).
+name: Publicar no Pages (com variáveis do Supabase)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gerar src/config/supabase.runtime.js a partir das Variables
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          url = os.environ.get('SUPABASE_URL', '').strip()
+          key = os.environ.get('SUPABASE_ANON_KEY', '').strip()
+          ligado = bool(url and key) and not key.startswith('sb_secret_')
+          cfg = {'enabled': ligado, 'url': url if ligado else '', 'anonKey': key if ligado else ''}
+          open('src/config/supabase.runtime.js', 'w', encoding='utf-8').write('// GERADO no deploy (pages.yml). Não edite.\nexport default ' + json.dumps(cfg) + ';\n')
+          print('Supabase:', 'LIGADO' if ligado else 'DESLIGADO (variaveis vazias ou chave secreta recusada)')
+          PY
+
+      - name: Atualizar o service worker (cópia offline)
+        run: python3 scripts/gerar_sw.py
+
+      - name: Montar a pasta publicada (sem arquivos de desenvolvimento)
+        run: |
+          mkdir _site
+          cp index.html ranking.html testes.html favicon.ico favicon.svg apple-touch-icon.png sw.js _site/
+          cp -r src assets fonts vendor _site/
+          rm -f _site/src/config/supabase.local.js _site/src/config/supabase.local.example.js
+          rm -rf _site/assets/kemi/_fonte
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

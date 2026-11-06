@@ -4,7 +4,8 @@ import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage } from '../u
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getPlays, getSettings } from '../core/Storage.js';
-import { rankGame, officialAttempts } from '../core/Ranking.js';
+import { officialAttempts } from '../core/Ranking.js';
+import { gameRanking } from '../core/RankingSource.js';
 import { GAMES } from '../config/games.js';
 
 const CARD_H = 640;
@@ -53,7 +54,7 @@ export default class Hub extends BaseScene {
       c.add(kemi);
       c.add(T(this, 0, 10, g.name, compact ? 'h3' : 'h2', { color: COLORS.white }));
       c.add(T(this, 0, 85, g.desc, 'body', { color: COLORS.mint2, align: 'center', wordWrap: { width: CARD_W - 50 } }));
-      const best = rankGame(plays, g.id)[0];
+      const best = gameRanking(g.id)[0];
       c.add(T(this, 0, 215, best ? `Melhor: ${best.points}` : 'Seja o primeiro!', 'h3', { color: COLORS.neon }));
       if (best) c.add(T(this, 0, 262, best.nick, 'label', { color: COLORS.cyan }));
       c.gfx = gfx;

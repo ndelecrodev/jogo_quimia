@@ -35,3 +35,19 @@ Links de QR de exemplo (`example`), de `localhost` ou sem `https://` são recusa
 
 - Admin > **Zerar tudo para abrir a feira** (pede o PIN): apaga partidas de teste, contatos e códigos. Faça isso **em cada navegador/computador** usado para testar.
 - Conferir o `CHECKLIST_FEIRA.md` inteiro.
+
+## 5. Nuvem (Supabase) — opcional, só se for usar
+
+Guia completo: [SUPABASE.md](SUPABASE.md). A nuvem **vem desligada**; o jogo funciona igual sem ela.
+
+| O quê | Onde |
+|---|---|
+| Criar o projeto (região São Paulo, sem Auth) | supabase.com |
+| Colar os 5 blocos de `supabase/schema.sql` (bloco 5 = **seu PIN da nuvem**, 6+ dígitos) | Supabase > SQL Editor |
+| Rodar `supabase/verificar.sql`: **todas as linhas `ok = true`** | Supabase > SQL Editor |
+| Confirmar o Realtime em `ranking_public` | Supabase > Database > Publications |
+| `SUPABASE_URL` e chave **anon public** (nunca a service_role) | Supabase > Project Settings > API |
+| Colocar URL e anon em `src/config/supabase.runtime.js` e `enabled: true` (Opção A), **ou** criar as Variables no GitHub e rodar o workflow (Opção B) | GitHub |
+| Um **código de estação** diferente em cada computador de jogo (E1, E2…) | Admin > Configurações |
+| Antes de abrir: **Zerar tudo** no admin local **e** "Zerar TUDO na nuvem" | Admin > Nuvem |
+| Depois da feira: exportar o CSV e rodar `supabase/limpar_apos_evento.sql` (LGPD) | Admin > Nuvem / SQL Editor |

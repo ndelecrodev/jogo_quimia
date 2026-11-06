@@ -19,7 +19,7 @@ def arquivos():
     lista = [f for f in FIXOS if (RAIZ / f).exists()]
     for pasta, padroes in (("src", ("*.js", "*.css")), ("fonts", ("*.woff2", "*.css")), ("assets/kemi", ("*.png",))):
         for padrao in padroes:
-            lista += sorted(str(p.relative_to(RAIZ)).replace("\\", "/") for p in (RAIZ / pasta).rglob(padrao) if "_fonte" not in p.parts)
+            lista += sorted(str(p.relative_to(RAIZ)).replace("\\", "/") for p in (RAIZ / pasta).rglob(padrao) if "_fonte" not in p.parts and not p.name.endswith(".local.js"))
     return sorted(set(lista))
 
 

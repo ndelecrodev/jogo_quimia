@@ -1,6 +1,6 @@
 // GERADO por scripts/gerar_sw.py — não edite à mão. Rode `python scripts/gerar_sw.py` antes de publicar.
 // Service worker: rede primeiro (sempre a versão mais nova quando há internet) e cópia guardada quando está offline.
-const CACHE = 'quimia-arcade-799a5f4eb9';
+const CACHE = 'quimia-arcade-ac312913be';
 const ARQUIVOS = [
   "apple-touch-icon.png",
   "assets/kemi/kemi_down.png",
@@ -27,9 +27,14 @@ const ARQUIVOS = [
   "src/config/games.js",
   "src/config/misturas.js",
   "src/config/prizes.js",
+  "src/config/supabase.js",
+  "src/config/supabase.local.example.js",
+  "src/config/supabase.runtime.js",
+  "src/core/Cloud.js",
   "src/core/InputManager.js",
   "src/core/Profanity.js",
   "src/core/Ranking.js",
+  "src/core/RankingSource.js",
   "src/core/Sfx.js",
   "src/core/Storage.js",
   "src/core/clock.js",
