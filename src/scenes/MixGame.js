@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { BaseScene } from './BaseScene.js';
 import { COLORS, hex } from '../theme.js';
-import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage, floatText, burst, reduceFx } from '../ui.js';
+import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage, floatText, burst, reduceFx, glowKemi } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
@@ -9,7 +9,7 @@ import { LIVES, W, H } from '../config/game.js';
 import { mixParams, MIX_LEVELS } from '../config/difficulty.js';
 import { MISTURAS, PRODUTOS } from '../config/misturas.js';
 
-const SHELF_Y = 740;
+const SHELF_Y = 700;
 const LEFT_X = 560;
 const RIGHT_X = 1360;
 const FALLBACK_COLORS = ['cyanLight', 'mint1', 'mint3', 'sky', 'greenDark', 'sky2'];
@@ -65,23 +65,23 @@ export default class MixGame extends BaseScene {
     this.add.rectangle(W - 60, 70, 360, 22, hex(COLORS.card)).setOrigin(1, 0.5).setDepth(20);
     this.timeBar = this.add.rectangle(W - 60, 70, 360, 22, hex(COLORS.neon)).setOrigin(1, 0.5).setDepth(21);
     T(this, W - 60, 112, 'TEMPO', 'caption', { origin: [1, 0.5], color: COLORS.sky2, depth: 20 });
-    this.comboText = T(this, 960, 890, '', 'h2', { color: COLORS.cyanLight, depth: 20 });
+    this.comboText = T(this, 960, 345, '', 'h2', { color: COLORS.cyanLight, depth: 20 });
 
     // Pergunta e barra de tempo da rodada
     this.question = T(this, 960, 190, 'Pode misturar?', 'h1', { color: COLORS.white, depth: 20 });
     this.add.rectangle(960, 270, 700, 18, hex(COLORS.card)).setDepth(20);
     this.roundBar = this.add.rectangle(610, 270, 700, 18, hex(COLORS.neon)).setOrigin(0, 0.5).setDepth(21);
-    this.plus = T(this, 960, 600, '+', 'display', { color: COLORS.cyan, depth: 8, fontSize: '150px' });
+    this.plus = T(this, 960, 520, '+', 'display', { color: COLORS.cyan, depth: 8, fontSize: '150px' });
 
     // Botões de resposta
     this.btnSafe = this.makePrompt(480, 'SEGURO', '←', COLORS.neon);
     this.btnDanger = this.makePrompt(1440, 'PERIGOSO', '→', COLORS.danger);
 
     // Kemi reage
-    this.kemi = fitImage(this.add.image(960, 975, kemiKey(this)).setDepth(10), 120);
+    this.kemi = glowKemi(fitImage(this.add.image(960, 975, kemiKey(this)).setDepth(10), 150));
     this.kemiY = this.kemi.y;
 
-    this.startHint = T(this, 960, 560, 'Aperte ESPAÇO ou ✕ para começar', 'h2', { color: COLORS.white, depth: 30, stroke: COLORS.bg, strokeThickness: 8 });
+    this.startHint = T(this, 960, 410, 'Aperte ESPAÇO ou ✕ para começar', 'h2', { color: COLORS.white, depth: 30, stroke: COLORS.bg, strokeThickness: 8 });
     if (!this.fxReduced) this.tweens.add({ targets: this.startHint, alpha: 0.4, duration: 650, yoyo: true, repeat: -1 });
 
     // Pausa
@@ -110,34 +110,143 @@ export default class MixGame extends BaseScene {
     });
   }
 
-  // ---------- Produtos (desenhados em código) ----------
+  // ---------- Produtos (cada um com silhueta e cor próprias, desenhados em código) ----------
+  // Origem (0,0) = base do produto na prateleira; desenha para cima. Altura máxima ~300 px.
+  drawProduto(g, forma, fill) {
+    const sky = hex(COLORS.sky);
+    const neon = hex(COLORS.neon);
+    const corpo = (x, y, w, h, r) => {
+      g.fillStyle(fill, 0.95);
+      g.fillRoundedRect(x, y, w, h, r);
+      g.lineStyle(8, sky, 1);
+      g.strokeRoundedRect(x, y, w, h, r);
+    };
+    const rotulo = (x, y, w, h) => {
+      g.fillStyle(0xffffff, 0.8);
+      g.fillRoundedRect(x, y, w, h, 10);
+    };
+    const brilho = (x, y, h) => {
+      g.fillStyle(0xffffff, 0.3);
+      g.fillRoundedRect(x, y, 14, h, 7);
+    };
+    const tampa = (x, y, w, h) => {
+      g.fillStyle(neon, 1);
+      g.fillRoundedRect(x, y, w, h, 8);
+    };
+    switch (forma) {
+      case 'galao': // galão com alça
+        g.lineStyle(10, sky, 1);
+        g.strokeRoundedRect(58, -215, 52, 110, 22);
+        corpo(-95, -235, 190, 235, 28);
+        corpo(-30, -268, 60, 36, 6);
+        tampa(-38, -292, 76, 28);
+        rotulo(-65, -170, 130, 90);
+        brilho(-82, -215, 130);
+        break;
+      case 'spray': // frasco com gatilho
+        corpo(-58, -190, 116, 190, 24);
+        corpo(-22, -222, 44, 36, 6);
+        g.fillStyle(neon, 1);
+        g.fillRoundedRect(-52, -270, 112, 52, 12);
+        g.fillRoundedRect(52, -256, 34, 16, 6);
+        g.lineStyle(8, sky, 1);
+        g.lineBetween(-10, -218, 30, -150);
+        rotulo(-40, -140, 80, 70);
+        brilho(-46, -175, 110);
+        break;
+      case 'frasco': // frasco pequeno de boca estreita
+        corpo(-62, -160, 124, 160, 22);
+        corpo(-24, -198, 48, 44, 6);
+        tampa(-30, -222, 60, 26);
+        rotulo(-42, -120, 84, 70);
+        brilho(-50, -140, 90);
+        break;
+      case 'garrafa': // garrafa alta de gargalo
+        corpo(-60, -215, 120, 215, 42);
+        corpo(-25, -300, 50, 100, 8);
+        tampa(-31, -322, 62, 26);
+        rotulo(-42, -160, 84, 90);
+        brilho(-48, -190, 120);
+        break;
+      case 'pote': // pote com tampa
+        corpo(-100, -175, 200, 175, 32);
+        g.fillStyle(neon, 1);
+        g.fillRoundedRect(-108, -212, 216, 42, 12);
+        rotulo(-70, -130, 140, 70);
+        brilho(-88, -150, 100);
+        break;
+      case 'squeeze': // frasco de detergente (bico fino)
+        corpo(-66, -200, 132, 200, 54);
+        g.fillStyle(fill, 0.95);
+        g.fillTriangle(-34, -196, 34, -196, 10, -250);
+        g.fillTriangle(-34, -196, -10, -250, 10, -250);
+        g.lineStyle(8, sky, 1);
+        g.lineBetween(-34, -196, -10, -250);
+        g.lineBetween(34, -196, 10, -250);
+        tampa(-12, -276, 24, 30);
+        rotulo(-44, -150, 88, 70);
+        brilho(-54, -170, 100);
+        break;
+      case 'caixa': // caixa de sabão em pó
+        corpo(-108, -235, 216, 235, 14);
+        g.lineStyle(6, sky, 1);
+        g.lineBetween(-108, -190, 108, -190);
+        rotulo(-76, -150, 152, 100);
+        brilho(-96, -175, 140);
+        break;
+      case 'barra': // barra de sabão
+        corpo(-124, -125, 248, 125, 28);
+        g.lineStyle(6, sky, 0.9);
+        g.strokeRoundedRect(-96, -98, 192, 72, 18);
+        brilho(-108, -108, 70);
+        break;
+      case 'copo': // copo de água
+        g.fillStyle(0xffffff, 0.14);
+        g.fillPoints([{ x: -84, y: -215 }, { x: 84, y: -215 }, { x: 62, y: 0 }, { x: -62, y: 0 }], true);
+        g.fillStyle(fill, 0.95);
+        g.fillPoints([{ x: -76, y: -130 }, { x: 76, y: -130 }, { x: 62, y: 0 }, { x: -62, y: 0 }], true);
+        g.lineStyle(8, sky, 1);
+        g.strokePoints([{ x: -84, y: -215 }, { x: -62, y: 0 }, { x: 62, y: 0 }, { x: 84, y: -215 }], false);
+        brilho(-62, -190, 120);
+        break;
+      case 'limao': // limão
+        g.fillStyle(fill, 1);
+        g.fillEllipse(0, -80, 220, 150);
+        g.fillTriangle(-110, -80, -128, -92, -112, -66);
+        g.fillTriangle(110, -80, 128, -92, 112, -66);
+        g.lineStyle(8, hex(COLORS.success), 1);
+        g.strokeEllipse(0, -80, 220, 150);
+        g.fillStyle(hex(COLORS.success), 1);
+        g.fillEllipse(24, -170, 64, 30);
+        g.fillStyle(0xffffff, 0.35);
+        g.fillEllipse(-50, -110, 60, 26);
+        break;
+      case 'lata': // lata de produto forte
+        corpo(-76, -235, 152, 235, 16);
+        g.fillStyle(neon, 1);
+        g.fillRoundedRect(-80, -252, 160, 24, 8);
+        g.fillStyle(0x1e2222, 0.85);
+        for (let k = -2; k < 3; k++) g.fillTriangle(-70 + k * 30, -90, -50 + k * 30, -90, -60 + k * 30, -150);
+        brilho(-62, -215, 150);
+        break;
+      default: // garrafa genérica
+        corpo(-62, -200, 124, 200, 30);
+        corpo(-26, -262, 52, 68, 8);
+        tampa(-32, -284, 64, 26);
+        rotulo(-42, -150, 84, 80);
+    }
+  }
+
   makeProduct(id, x) {
     const p = PRODUTOS[id] || { nome: id };
-    const key = p.cor || FALLBACK_COLORS[[...id].reduce((a, c) => a + c.charCodeAt(0), 0) % FALLBACK_COLORS.length];
-    const fill = hex(COLORS[key] || COLORS.cyan);
+    const cor = p.cor || FALLBACK_COLORS[[...id].reduce((a, ch) => a + ch.charCodeAt(0), 0) % FALLBACK_COLORS.length];
+    const fill = typeof cor === 'string' && cor.startsWith('#') ? parseInt(cor.slice(1), 16) : hex(COLORS[cor] || COLORS.cyan);
     const c = this.add.container(x, SHELF_Y).setDepth(8);
     const g = this.add.graphics();
-    g.fillStyle(fill, 0.9);
-    g.lineStyle(8, hex(COLORS.sky), 1);
-    if (p.forma === 'jar') {
-      g.fillRoundedRect(-95, -180, 190, 180, 28);
-      g.strokeRoundedRect(-95, -180, 190, 180, 28);
-      g.fillStyle(hex(COLORS.neon), 1);
-      g.fillRoundedRect(-105, -208, 210, 36, 10);
-    } else {
-      g.fillRect(-34, -270, 68, 70);
-      g.strokeRect(-34, -270, 68, 70);
-      g.fillRoundedRect(-80, -215, 160, 215, 30);
-      g.strokeRoundedRect(-80, -215, 160, 215, 30);
-      g.fillStyle(hex(COLORS.neon), 1);
-      g.fillRoundedRect(-44, -298, 88, 32, 8);
-    }
-    g.fillStyle(0xffffff, 0.3);
-    g.fillRoundedRect(-62, -170, 14, 110, 7);
-    g.fillStyle(0xffffff, 0.22);
-    g.fillRoundedRect(-52, -110, 104, 70, 12); // rótulo
+    this.drawProduto(g, p.forma, fill);
     c.add(g);
-    c.add(T(this, 0, 78, p.nome, 'h3', { wordWrap: { width: 440 }, align: 'center', origin: [0.5, 0] }));
+    // Rótulo grande (44 px em 1080p), legível de longe
+    c.add(T(this, 0, 52, p.nome, 'h3', { fontSize: '44px', wordWrap: { width: 470 }, align: 'center', origin: [0.5, 0], stroke: COLORS.bg, strokeThickness: 6 }));
     return c;
   }
 
@@ -201,10 +310,10 @@ export default class MixGame extends BaseScene {
       this.scoreText.setText(String(this.points));
       this.tweens.add({ targets: this.scoreText, scale: 1.25, duration: 90, yoyo: true });
       sfx.play('point');
-      floatText(this, 960, 520, `+${mult}`, COLORS.neon, 'display');
+      floatText(this, 960, 470, `+${mult}`, COLORS.neon, 'display');
       this.question.setText(pair.perigosa ? 'PERIGOSO!' : 'SEGURO!').setColor(pair.perigosa ? COLORS.danger : COLORS.neon);
       this.plus.setText(pair.perigosa ? '✕' : '✓').setColor(pair.perigosa ? COLORS.danger : COLORS.neon);
-      if (!this.fxReduced) burst(this, 960, 600, 10);
+      if (!this.fxReduced) burst(this, 960, 520, 10);
       this.tweens.add({ targets: l, x: LEFT_X + 70, duration: 160, yoyo: true });
       this.tweens.add({ targets: r, x: RIGHT_X - 70, duration: 160, yoyo: true });
       this.kemi.setTexture(kemiKey(this, Math.random() < 0.5 ? 'happy' : 'wink'));

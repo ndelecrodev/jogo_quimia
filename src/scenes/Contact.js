@@ -27,7 +27,7 @@ export default class Contact extends BaseScene {
     this.bubbles = new BubbleField(this, 14);
 
     T(this, 960, 60, 'Entrou no ranking!', 'h1', { color: COLORS.neon });
-    T(this, 960, 125, 'Deixa seu @ ou WhatsApp para a gente te chamar se ganhar. Pode digitar no teclado.', 'bodyL', { color: COLORS.mint2 });
+    T(this, 960, 125, 'É opcional: deixe seu @ ou WhatsApp para a gente te chamar se ganhar. Pode digitar no teclado.', 'bodyL', { color: COLORS.mint2 });
 
     const box = this.add.graphics();
     drawCard(box, 410, 165, 1100, 100, { fill: COLORS.card, stroke: COLORS.neon, sw: 4 });
@@ -85,6 +85,7 @@ export default class Contact extends BaseScene {
   }
 
   label(k) {
+    if (k.label === 'AGORA NÃO') return 'AGORA NÃO  (○ / Esc)';
     if (k.label === 'CHECK_LGPD') return `${this.consent ? '[X]' : '[  ]'}  ${LGPD}`;
     if (k.label === 'CHECK_EMPRESA') return `${this.company ? '[X]' : '[  ]'}  Sou de uma empresa (quero saber do painel B2B)`;
     return k.label;

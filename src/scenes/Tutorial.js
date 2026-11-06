@@ -34,7 +34,7 @@ export default class Tutorial extends BaseScene {
     // Barra de progresso (3 s)
     const bar = this.add.rectangle(560, 990, 0, 14, hex(COLORS.neon)).setOrigin(0, 0.5);
     this.tweens.add({ targets: bar, width: 800, duration: DURATION, onComplete: () => this.start() });
-    T(this, 960, 1040, 'Aperte ação para pular', 'caption', { color: COLORS.sky2 });
+    T(this, 960, 1040, input.padConnected ? '✕ para pular  ·  ○ para voltar' : 'ESPAÇO ou ✕ para pular  ·  Esc para voltar', 'bodyS', { color: COLORS.sky2 });
     this.started = false;
   }
 

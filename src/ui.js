@@ -100,6 +100,16 @@ export function fitImage(img, size) {
   return img;
 }
 
+/** Brilho suave ciano (#5ADFEA) em volta da Kemi para destacar no fundo escuro. Só no modo WebGL; falhou, segue sem. */
+export function glowKemi(img) {
+  try {
+    if (img.scene.game.renderer.type === Phaser.WEBGL && img.postFX) img.postFX.addGlow(hex(COLORS.cyan), 3, 0, false, 0.1, 14);
+  } catch (e) {
+    /* sem brilho: tudo bem */
+  }
+  return img;
+}
+
 export function floatText(scene, x, y, str, color = COLORS.neon, size = 'h2') {
   const t = T(scene, x, y, str, size, { color, depth: 30, stroke: COLORS.bg, strokeThickness: 6 });
   scene.tweens.add({ targets: t, y: y - 90, alpha: 0, duration: 800, ease: 'Cubic.easeOut', onComplete: () => t.destroy() });

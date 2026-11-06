@@ -29,7 +29,7 @@ export default class Viral extends BaseScene {
     // Dois QR codes
     this.qrBox(560, 'PARA VOCÊ', 'Em breve: entre na lista de espera', s.urlUser);
     this.qrBox(1360, 'PARA EMPRESAS', 'Conheça o painel da Quimia', s.urlCompany);
-    fitImage(this.add.image(960, 560, kemiKey(this, 'wink')).setDepth(5), 200);
+    fitImage(this.add.image(960, 560, kemiKey(this, 'wink')).setDepth(5), 160);
 
     // Progresso
     const bar = this.add.rectangle(560, 1010, 0, 12, hex(COLORS.neon)).setOrigin(0, 0.5);
@@ -40,7 +40,7 @@ export default class Viral extends BaseScene {
 
   qrBox(x, title, caption, url) {
     const g = this.add.graphics();
-    drawCard(g, x - 330, 250, 660, 700, { fill: COLORS.card, stroke: COLORS.elevated2 });
+    drawCard(g, x - 310, 250, 620, 700, { fill: COLORS.card, stroke: COLORS.elevated2 });
     T(this, x, 305, title, 'h2', { color: COLORS.cyan });
     // Link ainda não definido (ou de exemplo): mostra "Em breve" em vez de um QR que não abre nada
     let ok = isRealUrl(url);

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { BaseScene } from './BaseScene.js';
 import { COLORS, hex } from '../theme.js';
-import { addBackground, BubbleField, T, kemiKey, fitImage, floatText, burst, reduceFx } from '../ui.js';
+import { addBackground, BubbleField, T, kemiKey, fitImage, floatText, burst, reduceFx, glowKemi } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
@@ -10,12 +10,12 @@ import { runnerParams, RUNNER_PHYSICS, RUNNER_OBSTACLES, RUNNER_CLUSTER_SPAN, RU
 
 const GROUND = 900; // topo da prateleira
 const KX = 420; // posição horizontal da Kemi
-const STAND_H = 95; // altura da caixa de colisão em pé
-const DUCK_H = 55; // abaixada
-const HALF_W = 30;
+const STAND_H = 130; // altura da caixa de colisão em pé (o desenho tem 180: perdoa)
+const DUCK_H = 62; // abaixada (precisa ficar abaixo da nuvem baixa, que começa a 81 px do chão)
+const HALF_W = 40;
 const INVULN_MS = 1500;
 const SPAWN_X = 2050;
-const CLOUD_Y = GROUND - 98; // nuvem baixa: passa por baixo se abaixar, ou por cima se pular
+const CLOUD_Y = GROUND - 98; // a nuvem ocupa de 71 a 125 px acima do chão // nuvem baixa: passa por baixo se abaixar, ou por cima se pular
 const { gravity: G, jump: JUMP, cutJump: CUT } = RUNNER_PHYSICS;
 const { low: LOW_H, tall: TALL_H, bottleW, tallW, clusterGap } = RUNNER_OBSTACLES;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -69,7 +69,8 @@ export default class RunnerGame extends BaseScene {
 
     // Kemi (âncora nos pés, para agachar e esticar a partir do chão)
     this.kemi = this.add.image(KX, GROUND, kemiKey(this)).setOrigin(0.5, 1).setDepth(10);
-    fitImage(this.kemi, 130);
+    fitImage(this.kemi, 180);
+    glowKemi(this.kemi);
 
     // HUD
     this.scoreText = T(this, 960, 70, '0', 'display', { depth: 20, stroke: COLORS.bg, strokeThickness: 8 });

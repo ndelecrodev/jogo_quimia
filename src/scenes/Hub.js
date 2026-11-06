@@ -49,7 +49,7 @@ export default class Hub extends BaseScene {
       const c = this.add.container(cx, 600);
       const gfx = this.add.graphics();
       c.add(gfx);
-      const kemi = fitImage(this.add.image(0, -170, kemiKey(this)), compact ? 190 : 230);
+      const kemi = fitImage(this.add.image(0, -170, kemiKey(this, g.pose)), compact ? 190 : 230);
       c.add(kemi);
       c.add(T(this, 0, 10, g.name, compact ? 'h3' : 'h2', { color: COLORS.white }));
       c.add(T(this, 0, 85, g.desc, 'body', { color: COLORS.mint2, align: 'center', wordWrap: { width: CARD_W - 50 } }));

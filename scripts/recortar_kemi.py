@@ -11,7 +11,7 @@ de cada recorte e para no contorno colorido da bolha.
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 SAIDA = Path(__file__).resolve().parent.parent / "assets" / "kemi"
 
@@ -69,7 +69,9 @@ def recortar(img):
     # suaviza a borda e come 1 px para não ficar halo branco
     alpha = alpha.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(1.1))
     alpha = maior_regiao(alpha)
-    out = rgb.convert("RGBA")
+    # um pouco mais de cor e contraste: sobre o fundo escuro do jogo a aquarela pálida fica acinzentada
+    vivo = ImageEnhance.Contrast(ImageEnhance.Color(rgb).enhance(1.3)).enhance(1.06)
+    out = vivo.convert("RGBA")
     out.putalpha(alpha)
     box = alpha.point(lambda v: 255 if v > 20 else 0).getbbox()
     out = out.crop(box)

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { BaseScene } from './BaseScene.js';
 import { COLORS, hex } from '../theme.js';
-import { addBackground, BubbleField, T, kemiKey, fitImage, floatText, burst, reduceFx } from '../ui.js';
+import { addBackground, BubbleField, T, kemiKey, fitImage, floatText, burst, reduceFx, glowKemi } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
@@ -11,7 +11,7 @@ import { BUBBLE_LEVELS, bubbleParams } from '../config/difficulty.js';
 // ---- Constantes de física/visual (1080p) ----
 const FLOOR_Y = 1010; // topo da "prateleira" (chão)
 const KEMI_X = 560;
-const KEMI_R = 40; // raio de colisão (um pouco menor que o sprite: perdoa)
+const KEMI_R = 56; // raio de colisão (menor que o desenho, que tem ~95: perdoa)
 const GRAV = 1900;
 const FLAP = -640;
 const BODY_W = 150; // corpo do frasco
@@ -70,7 +70,7 @@ export default class BubbleGame extends BaseScene {
     this.hadPad = input.padConnected;
 
     // Kemi
-    this.kemi = fitImage(this.add.image(KEMI_X, 540, kemiKey(this)).setDepth(10), 135);
+    this.kemi = glowKemi(fitImage(this.add.image(KEMI_X, 540, kemiKey(this)).setDepth(10), 190));
 
     // HUD
     this.scoreText = T(this, 960, 70, '0', 'display', { depth: 20, stroke: COLORS.bg, strokeThickness: 8 });
@@ -303,7 +303,7 @@ export default class BubbleGame extends BaseScene {
     for (const pk of this.pickups) {
       pk.x -= dx;
       pk.s.x = pk.x;
-      if (!pk.got && Phaser.Math.Distance.Between(pk.x, pk.y, KEMI_X, this.kemi.y) < 70) {
+      if (!pk.got && Phaser.Math.Distance.Between(pk.x, pk.y, KEMI_X, this.kemi.y) < 85) {
         pk.got = true;
         pk.s.destroy();
         sfx.play('bonus');

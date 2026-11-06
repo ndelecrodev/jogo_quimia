@@ -1,14 +1,14 @@
 import Phaser from 'phaser';
 import { BaseScene } from './BaseScene.js';
 import { COLORS, hex } from '../theme.js';
-import { addBackground, BubbleField, T, kemiKey, fitImage, floatText, burst, reduceFx } from '../ui.js';
+import { addBackground, BubbleField, T, kemiKey, fitImage, floatText, burst, reduceFx, glowKemi } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
 import { LIVES, W, H } from '../config/game.js';
 import { sobeParams, SOBE_PHYSICS } from '../config/difficulty.js';
 
-const KR = 40; // raio da Kemi
+const KR = 66; // raio de colisão da Kemi (o desenho tem ~95: perdoa)
 const SCROLL_Y = 420; // quando a Kemi passa daqui, o mundo desce
 const PLAT_H = 28;
 const INVULN_MS = 2000; // também vale ao começar e ao renascer
@@ -59,7 +59,7 @@ export default class SobeGame extends BaseScene {
     this.nextRowY = 960;
     this.lastX = W / 2;
     this.addPlatform(W / 2, 960, 'plat_n', 360);
-    this.kemi = fitImage(this.add.image(W / 2, 960 - PLAT_H / 2 - KR, kemiKey(this)).setDepth(10), 135);
+    this.kemi = glowKemi(fitImage(this.add.image(W / 2, 960 - PLAT_H / 2 - KR, kemiKey(this)).setDepth(10), 190));
     this.fill(sobeParams(0, 0, this.maxTime));
 
     this.shieldRing = this.add.image(0, 0, 'bg_bubble').setScale(1.5).setAlpha(0.9).setDepth(11).setVisible(false);
@@ -312,7 +312,7 @@ export default class SobeGame extends BaseScene {
     for (const c of this.clouds) {
       c.s.x += c.vx * dt;
       if (c.s.x < 100 || c.s.x > W - 100) c.vx *= -1;
-      if (!inv && this.boost <= 0 && Phaser.Math.Distance.Between(c.s.x, c.s.y, this.kemi.x, this.kemi.y) < 95) {
+      if (!inv && this.boost <= 0 && Phaser.Math.Distance.Between(c.s.x, c.s.y, this.kemi.x, this.kemi.y) < 115) {
         if (this.shield) {
           this.shield = false;
           this.invUntil = this.elapsed + 800;
@@ -330,7 +330,7 @@ export default class SobeGame extends BaseScene {
 
     // Power-ups
     for (const u of this.pups) {
-      if (!u.got && Phaser.Math.Distance.Between(u.s.x, u.s.y, this.kemi.x, this.kemi.y) < 75) {
+      if (!u.got && Phaser.Math.Distance.Between(u.s.x, u.s.y, this.kemi.x, this.kemi.y) < 90) {
         u.got = true;
         u.s.destroy();
         sfx.play('bonus');
