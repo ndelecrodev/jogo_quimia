@@ -6,7 +6,7 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
 import { LIVES, W, H } from '../config/game.js';
-import { sobeParams, SOBE_PHYSICS } from '../config/difficulty.js';
+import { sobeParams, SOBE_PHYSICS, SOBE_PT_ALTURA, SOBE_PT_POWERUP, scaleScore } from '../config/difficulty.js';
 
 const KR = 66; // raio de colisão da Kemi (o desenho tem ~95: perdoa)
 const SCROLL_Y = 420; // quando a Kemi passa daqui, o mundo desce
@@ -35,6 +35,7 @@ export default class SobeGame extends BaseScene {
 
     // Estado
     this.points = 0;
+    this.bonusPts = 0;
     this.height = 0;
     this.lives = LIVES;
     this.moved = false; // o jogador mexeu a Kemi pelo menos uma vez?
@@ -182,7 +183,7 @@ export default class SobeGame extends BaseScene {
     this.kemi.setVisible(false);
     this.shieldRing.setVisible(false);
     this.time.delayedCall(900, () =>
-      this.scene.start('GameOver', { game: 'sobe', points: this.points, durationMs: Math.round(this.elapsed), reason, acted: this.moved })
+      this.scene.start('GameOver', { game: 'sobe', points: scaleScore('sobe', this.points), durationMs: Math.round(this.elapsed), reason, acted: this.moved })
     );
   }
 
@@ -260,11 +261,12 @@ export default class SobeGame extends BaseScene {
       this.height += dy;
       this.fill(params);
       this.cull();
-      const pts = Math.floor(this.height / 10);
-      if (pts !== this.points) {
-        this.points = pts;
-        this.scoreText.setText(String(pts));
-      }
+    }
+    // Pontos brutos: altura (peso baixo) + bônus por habilidade (power-ups e vapores evitados com escudo)
+    const pts = Math.floor(this.height / SOBE_PT_ALTURA) + this.bonusPts;
+    if (pts !== this.points) {
+      this.points = pts;
+      this.scoreText.setText(String(scaleScore('sobe', pts)));
     }
 
     // Nunca fica presa: sem subir por STUCK_MS, aparece uma prateleira larga acima dela
@@ -334,6 +336,7 @@ export default class SobeGame extends BaseScene {
         u.got = true;
         u.s.destroy();
         sfx.play('bonus');
+        this.bonusPts += SOBE_PT_POWERUP;
         if (u.type === 'rocket') {
           this.boost = BOOST_MS;
           floatText(this, this.kemi.x, this.kemi.y - 60, 'TAMPINHA-FOGUETE!', COLORS.neon, 'h3');

@@ -155,8 +155,8 @@ function renderMain() {
     <h2>Nuvem (Supabase)</h2>
     <div class="card" id="cloud"></div>
 
-    <h2>Buscar código de resgate</h2>
-    <div class="card"><input type="text" id="filter" placeholder="Código (ex.: K7P2), apelido ou jogo" value="${esc(filter)}" style="width:min(420px,100%)">
+    <h2>Buscar por apelido ou código (entregar brinde)</h2>
+    <div class="card"><input type="text" id="filter" placeholder="Apelido, código (ex.: K7P2) ou jogo" value="${esc(filter)}" style="width:min(420px,100%)">
       <div id="found"></div></div>
 
     <h2>Partidas</h2>
@@ -257,20 +257,22 @@ function renderTable() {
   const all = getPlays().slice().sort((a, b) => b.ts - a.ts);
   const list = all.filter((p) => !q || (p.code || '').toLowerCase().includes(q) || p.nick.toLowerCase().includes(q) || gameName(p.game).toLowerCase().includes(q));
 
-  // Resultado direto para código exato
-  const exact = q.length === 4 ? all.find((p) => (p.code || '').toLowerCase() === q) : null;
-  root.querySelector('#found').innerHTML = exact
-    ? `<div class="card found"><b>${esc(exact.code)}</b> — ${esc(exact.nick)} · ${esc(gameName(exact.game))} · ${exact.points} pontos (${exact.quimia} Quimia)<br>
-       Brindes: ${playPrizes(exact, s)} ·
-       ${exact.delivered ? `<b style="color:#FF7A7A">JÁ ENTREGUE</b> em ${fmtDate(exact.deliveredAt || exact.ts)}` : '<b style="color:#1EEE97">AINDA NÃO ENTREGUE</b>'}
-       <button class="small" data-act="deliver" data-id="${esc(exact.id)}">${exact.delivered ? 'Desmarcar entrega' : 'Marcar entregue'}</button></div>`
-    : q.length === 4
-    ? '<div class="err">Nenhum código com esse valor.</div>'
+  // Resultado direto: por CÓDIGO exato (4 letras) ou por APELIDO (a tela final não mostra mais o código).
+  // Cada cartão mostra se já foi entregue e deixa marcar, para a equipe entregar sem duplicar.
+  const achados = q ? all.filter((p) => p.official && p.code && ((p.code || '').toLowerCase() === q || p.nick.toLowerCase().includes(q))).slice(0, 6) : [];
+  const cartao = (p) => `<div class="card found"><b style="font-size:18px">${esc(p.nick)}</b> · ${esc(gameName(p.game))} · ${p.points} pontos · código <b>${esc(p.code)}</b><br>
+       Brinde: ${playPrizes(p, s)} ·
+       ${p.delivered ? `<b style="color:#FF7A7A">JÁ ENTREGUE</b> em ${fmtDate(p.deliveredAt || p.ts)}` : '<b style="color:#1EEE97">AINDA NÃO ENTREGUE</b>'}
+       <button class="small" data-act="deliver" data-id="${esc(p.id)}">${p.delivered ? 'Desmarcar entrega' : 'Marcar brinde entregue'}</button></div>`;
+  root.querySelector('#found').innerHTML = achados.length
+    ? achados.map(cartao).join('')
+    : q.length >= 2 && !list.some((p) => p.official && p.code)
+    ? '<div class="err">Nenhum apelido ou código com esse valor (só partidas oficiais têm brinde).</div>'
     : '';
 
   const rows = list.slice(0, 300).map(
     (p) => `<tr class="${p.official ? 'ok' : 'train'}">
-      <td>${esc(fmtDate(p.ts))}</td><td>${esc(p.nick)}</td><td>${esc(gameName(p.game))}</td>
+      <td>${esc(fmtDate(p.ts))}</td><td>${esc(p.nick)}${p.official && p.code ? (p.delivered ? ' <span class="tag" style="background:#0AA074">entregue ✓</span>' : ' <span class="tag" style="background:#FF7A7A;color:#1E2222">brinde pendente</span>') : ''}</td><td>${esc(gameName(p.game))}</td>
       <td>${p.points}</td><td>${p.quimia}</td><td><b>${esc(p.code || '—')}</b></td><td>${playPrizes(p, s)}</td>
       <td>${p.official && p.code ? `<button class="small ${p.delivered ? 'sec' : ''}" data-act="deliver" data-id="${esc(p.id)}">${p.delivered ? 'Entregue ✓' : 'Marcar entregue'}</button>` : '—'}</td>
       <td>${p.contact ? `${esc(p.contact)}${p.company ? '<span class="tag">empresa</span>' : ''}` : '—'}</td>
@@ -285,6 +287,16 @@ function onInput(e) {
   if (e.target.id === 'filter') {
     filter = e.target.value;
     renderTable();
+  } else if (e.target.id === 'cloudFilter') {
+    // refaz só a lista da nuvem sem perder o foco do campo
+    cloudFilter = e.target.value;
+    const pos = e.target.selectionStart;
+    renderCloud();
+    const novo = root.querySelector('#cloudFilter');
+    if (novo) {
+      novo.focus();
+      novo.setSelectionRange(pos, pos);
+    }
   }
 }
 
@@ -500,6 +512,7 @@ function saveSettings() {
 let cloudPin = null;
 let cloudRows = null;
 let cloudMsg = '';
+let cloudFilter = '';
 
 async function cloudCall(fn, body) {
   try {
@@ -573,9 +586,11 @@ function renderCloud() {
     return;
   }
   const s = getSettings();
-  const rows = (cloudRows || []).slice(0, 200).map(
+  const fq = cloudFilter.trim().toLowerCase();
+  const visiveis = (cloudRows || []).filter((p) => !fq || String(p.nick).toLowerCase().includes(fq) || String(p.code || '').toLowerCase() === fq);
+  const rows = visiveis.slice(0, 200).map(
     (p) => `<tr class="${p.official ? 'ok' : 'train'}">
-      <td>${esc(fmtDate(p.played_at))}</td><td>${esc(p.station_id || '—')}</td><td>${esc(p.nick)}</td><td>${esc(gameName(p.game))}</td>
+      <td>${esc(fmtDate(p.played_at))}</td><td>${esc(p.station_id || '—')}</td><td>${esc(p.nick)}${p.official && p.code ? (p.delivered ? ' <span class="tag" style="background:#0AA074">entregue ✓</span>' : ' <span class="tag" style="background:#FF7A7A;color:#1E2222">pendente</span>') : ''}</td><td>${esc(gameName(p.game))}</td>
       <td>${p.points}</td><td><b>${esc(p.code || '—')}</b></td>
       <td>${p.official && p.code ? `<button class="small ${p.delivered ? 'sec' : ''}" data-act="cloud-deliver" data-code="${esc(p.code)}" data-station="${esc(p.station_id || '')}" data-id="${esc(p.id)}" data-to="${p.delivered ? '0' : '1'}">${p.delivered ? 'Entregue ✓' : 'Marcar entregue'}</button>` : '—'}</td>
       <td>${p.contact ? `${esc(p.contact)}${p.company ? '<span class="tag">empresa</span>' : ''} <button class="small danger" data-act="cloud-delcontact" data-id="${esc(p.id)}">Apagar contato</button>` : '—'}</td>
@@ -590,6 +605,7 @@ function renderCloud() {
        <button class="sec" data-act="cloud-setpin">Trocar PIN da nuvem</button>
        <button class="sec" data-act="cloud-logout">Sair da nuvem</button></p>
     <div class="err">${esc(cloudMsg)}</div>
+    <p><input type="text" id="cloudFilter" placeholder="Buscar por apelido ou código" value="${esc(cloudFilter)}" style="width:min(360px,100%)"></p>
     <table><tr><th>Data</th><th>Estação</th><th>Apelido</th><th>Jogo</th><th>Pontos</th><th>Código</th><th>Entrega</th><th>Contato</th><th></th></tr>${rows.join('')}</table>
     <div style="color:#54A8B1;margin-top:6px">Brindes: ${esc(s.prizes.participacao)} · ${esc(s.prizes.meta)} · ${esc(s.prizes.master)}</div>`;
 }

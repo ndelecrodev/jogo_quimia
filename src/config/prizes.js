@@ -6,5 +6,5 @@ export const PRIZES = {
     master: 'Prêmio Master',
   },
   // Pontos reais mínimos por jogo para ganhar o brinde "Meta" (alvo: ~40% dos jogadores). Calibre no admin > Calibrar.
-  minScores: { bolha: 15, misturar: 20, sobe: 600, runner: 500 },
+  minScores: { bolha: 175, misturar: 165, sobe: 150, runner: 165 }, // P40 do bot médio (ver CALIBRACAO.md)
 };

@@ -6,7 +6,7 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
 import { LIVES, W, H } from '../config/game.js';
-import { BUBBLE_LEVELS, bubbleParams } from '../config/difficulty.js';
+import { BUBBLE_LEVELS, bubbleParams, scaleScore } from '../config/difficulty.js';
 
 // ---- Constantes de física/visual (1080p) ----
 const FLOOR_Y = 1010; // topo da "prateleira" (chão)
@@ -165,9 +165,9 @@ export default class BubbleGame extends BaseScene {
 
   addScore(n, x, y) {
     this.points += n;
-    this.scoreText.setText(String(this.points));
+    this.scoreText.setText(String(scaleScore('bolha', this.points)));
     this.tweens.add({ targets: this.scoreText, scale: 1.25, duration: 90, yoyo: true });
-    floatText(this, x, y, `+${n}`, n > 1 ? COLORS.cyanLight : COLORS.neon);
+    floatText(this, x, y, `+${scaleScore('bolha', n)}`, n > 1 ? COLORS.cyanLight : COLORS.neon);
     if (!this.fxReduced) burst(this, x, y, n > 1 ? 14 : 6);
   }
 
@@ -189,7 +189,7 @@ export default class BubbleGame extends BaseScene {
     burst(this, KEMI_X, this.kemi.y, 24);
     this.kemi.setVisible(false);
     this.time.delayedCall(900, () =>
-      this.scene.start('GameOver', { game: 'bolha', points: this.points, durationMs: Math.round(this.elapsed), reason, acted: this.flaps >= 2 })
+      this.scene.start('GameOver', { game: 'bolha', points: scaleScore('bolha', this.points), durationMs: Math.round(this.elapsed), reason, acted: this.flaps >= 2 })
     );
   }
 

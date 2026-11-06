@@ -6,7 +6,7 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
 import { LIVES, W, H } from '../config/game.js';
-import { mixParams, MIX_LEVELS } from '../config/difficulty.js';
+import { mixParams, MIX_LEVELS, MIX_COMBO_MAX, scaleScore } from '../config/difficulty.js';
 import { MISTURAS, PRODUTOS } from '../config/misturas.js';
 
 const SHELF_Y = 700;
@@ -305,12 +305,12 @@ export default class MixGame extends BaseScene {
     if (correct) {
       this.correct++;
       this.streak++;
-      const mult = Math.min(5, 1 + Math.floor(this.streak / 3));
+      const mult = Math.min(MIX_COMBO_MAX, 1 + Math.floor(this.streak / 3));
       this.points += mult;
-      this.scoreText.setText(String(this.points));
+      this.scoreText.setText(String(scaleScore('misturar', this.points)));
       this.tweens.add({ targets: this.scoreText, scale: 1.25, duration: 90, yoyo: true });
       sfx.play('point');
-      floatText(this, 960, 470, `+${mult}`, COLORS.neon, 'display');
+      floatText(this, 960, 470, `+${scaleScore('misturar', mult)}`, COLORS.neon, 'display');
       this.question.setText(pair.perigosa ? 'PERIGOSO!' : 'SEGURO!').setColor(pair.perigosa ? COLORS.danger : COLORS.neon);
       this.plus.setText(pair.perigosa ? '✕' : '✓').setColor(pair.perigosa ? COLORS.danger : COLORS.neon);
       if (!this.fxReduced) burst(this, 960, 520, 10);
@@ -318,7 +318,7 @@ export default class MixGame extends BaseScene {
       this.tweens.add({ targets: r, x: RIGHT_X - 70, duration: 160, yoyo: true });
       this.kemi.setTexture(kemiKey(this, Math.random() < 0.5 ? 'happy' : 'wink'));
       this.tweens.add({ targets: this.kemi, y: this.kemiY - 40, duration: 140, yoyo: true, ease: 'Quad.easeOut' });
-      this.comboText.setText(Math.min(5, 1 + Math.floor(this.streak / 3)) > 1 ? `COMBO x${Math.min(5, 1 + Math.floor(this.streak / 3))}` : '');
+      this.comboText.setText(Math.min(MIX_COMBO_MAX, 1 + Math.floor(this.streak / 3)) > 1 ? `COMBO x${Math.min(MIX_COMBO_MAX, 1 + Math.floor(this.streak / 3))}` : '');
       this.time.delayedCall(380, () => this.afterFeedback());
     } else {
       this.streak = 0;
@@ -360,7 +360,7 @@ export default class MixGame extends BaseScene {
     this.time.delayedCall(700, () =>
       this.scene.start('GameOver', {
         game: 'misturar',
-        points: this.points,
+        points: scaleScore('misturar', this.points),
         durationMs: Math.round(this.elapsed),
         reason,
         acted: this.answers >= 1,

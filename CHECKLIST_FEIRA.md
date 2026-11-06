@@ -13,10 +13,11 @@ Marque cada item. Faça a parte "Véspera" com tudo montado como será no stand.
 - [ ] TV/2º monitor: `iniciar_ranking.bat` mostra o ranking, atualiza ao vivo depois de uma partida e mostra "Campeão em HH:MM:SS".
 - [ ] **Jogou os 4 jogos até o fim** (Kemi Bolha, Pode Misturar?, Kemi Sobe, Kemi Runner) com teclado **e** controle. Dificuldade ok para iniciantes (40-60 s de jogo).
 - [ ] Partida parada (sem apertar nada) mostra "Vamos de novo?" e **não** gasta tentativa nem dá código.
-- [ ] Tela final mostra pontos, posição, código de resgate e brinde; abaixo do mínimo diz "Quase lá!".
-- [ ] Entrou no Top 3 ou bateu a meta: aparece a tela de contato (testar o aceite LGPD e "agora não" com ○/Esc) e depois os 2 QR codes.
-- [ ] **QR codes abrem a página certa** ao escanear com um celular (usuário e empresa). Se ainda não há link, o convite mostra "Em breve".
-- [ ] Admin: `Ctrl+Shift+A`; **PIN criado** e anotado só com a equipe; buscar um código; marcar entregue; exportar CSV; exportar JSON.
+- [ ] Tela final mostra pontos, posição, o **brinde** e o **apelido grande** (sem código); não existe "Jogar de novo"; abaixo do mínimo diz "Quase lá!".
+- [ ] Depois do fim de partida (e do contato, se pedir) cai no **Hub** com "Sua jogada oficial já foi!"; 15 s sem apertar nada volta à atração e limpa o apelido; Esc/○ no Hub troca de jogador.
+- [ ] Entrou no Top 3 ou bateu a meta: aparece a tela de contato (testar o aceite LGPD e "agora não" com ○/Esc) e depois volta direto ao Hub (sem tela de QR).
+- [ ] **QR codes abrem a página certa** ao escanear com um celular (usuário e empresa) no painel de convite da **atração**. Se ainda não há link, aparece "Em breve".
+- [ ] Admin: `Ctrl+Shift+A`; **PIN criado** e anotado só com a equipe; buscar por **apelido** e por código; "Marcar brinde entregue"; exportar CSV; exportar JSON.
 - [ ] Admin: **nenhum alerta vermelho** de pendências (ou só os que a equipe decidiu deixar).
 - [ ] Brindes, metas, hora do campeão, Instagram, hashtag e links conferidos (veja o `PENDENCIAS.md`).
 - [ ] **Pares do Pode Misturar? conferidos com as FDS** (nenhum erro de segurança) e marcados `validar: false`.
@@ -37,7 +38,7 @@ Marque cada item. Faça a parte "Véspera" com tudo montado como será no stand.
 
 ## Durante o evento
 - [ ] Ver de hora em hora: controle carregado, jogo respondendo, TV atualizando.
-- [ ] Conferir **sempre o código no admin** antes de entregar brinde.
+- [ ] Conferir **sempre o apelido no admin** (busca) antes de entregar brinde: tem que estar "AINDA NÃO ENTREGUE".
 - [ ] Anotar problemas e sugestões (o que confundiu as pessoas, onde a fila trava).
 - [ ] **Exportar JSON** na metade do evento (backup).
 

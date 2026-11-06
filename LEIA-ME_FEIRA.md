@@ -45,17 +45,22 @@ Se o servidor não subir, abra o Prompt de Comando na pasta e rode `python servi
 **Versão hospedada (GitHub Pages):** serve de plano B. Depois de aberta uma vez com internet, ela funciona offline (veja "Publicar" abaixo). Lembre que o ranking fica no navegador onde se joga.
 
 ## Quem entra no ranking e quem ganha brinde
-- **Partida parada ou abandonada** (nenhuma ação, ou 0 pontos em menos de 10 s): **não vale nada**, não gasta tentativa, sem código nem brinde. Aparece "Vamos de novo?".
-- **Jogou de verdade, mas abaixo do mínimo do jogo:** gasta 1 tentativa e ganha o **brinde de participação** e o código, mas **não entra no ranking** (a tela diz quantos pontos faltam).
+- **Cada pessoa tem 1 jogada oficial** (por apelido). Depois dela o Hub mostra "Sua jogada oficial já foi! Chame o próximo jogador"; se ninguém apertar nada por 15 s, o jogo limpa o jogador e volta à tela de atração. **Esc / ○ no Hub = trocar de jogador.** Dá para treinar, mas treino não vale ranking nem brinde.
+- **Partida parada ou abandonada** (nenhuma ação, ou 0 pontos em menos de 10 s): **não vale nada**, não gasta a jogada, sem código nem brinde. Aparece "Vamos de novo?".
+- **Jogou de verdade, mas abaixo do mínimo do jogo:** gasta a jogada oficial e ganha o **brinde de participação** (e um código interno), mas **não entra no ranking** (a tela diz quantos pontos faltam).
 - **Fez o mínimo:** entra no ranking. Se bater a **meta**, ganha também o brinde da meta. Top 3 do jogo ou meta: pedimos o contato (opcional, com aceite LGPD).
-- Depois das tentativas oficiais (padrão: 2 por apelido), a partida é só treino: sem código nem ranking.
-- Os valores (meta, mínimo, par) se ajustam no admin; o **Calibrar** sugere números com as partidas já feitas.
+- As pontuações dos 4 jogos usam uma **escala comum** (`SCORE_SCALE` em `src/config/difficulty.js`) e o **par é 300 para todos**. Os valores (meta, mínimo, par) se ajustam no admin; o **Calibrar** sugere números com as partidas já feitas.
+- **Atenção:** a escala de pontos mudou. **Zere todas as partidas de teste** (admin > "Zerar tudo", e "Zerar TUDO na nuvem") antes de abrir, senão o ranking mistura escalas.
+- Se o admin já tinha "Tentativas oficiais" salvo com outro valor neste navegador, **confira que está 1** (Configurações).
 
 ## Brindes e código de resgate
-1. A pessoa mostra o **código de 4 letras** da tela final.
+A tela final mostra só o **brinde** (o maior que a pessoa ganhou) e o **apelido grande**; o código continua sendo gerado e fica no admin.
+1. A pessoa diz o **apelido** (que está na tela final) e a equipe confere a olho.
 2. Aperte **Ctrl + Shift + A** e digite o **PIN do admin**.
-3. Digite o código no campo de busca: aparece quem é e se **já foi entregue**.
-4. Clique em **Marcar entregue**. Nunca entregue se aparecer "JÁ ENTREGUE".
+3. Digite o **apelido** (ou o código) no campo de busca: aparece o brinde e se **já foi entregue**.
+4. Clique em **Marcar brinde entregue**. Nunca entregue se aparecer "JÁ ENTREGUE" (a lista também mostra "entregue ✓" ao lado do apelido).
+
+**Convite (Instagram/hashtag/QR):** não aparece mais depois da partida. Ele alterna com o ranking na tela de atração e há uma linha discreta no rodapé do Hub. Para voltar a mostrar a tela depois do jogo: `SHOW_VIRAL_AFTER_GAME = true` em `src/config/game.js`.
 
 ## Prêmio Master (campeão do evento)
 O líder do **Ranking Geral** na hora marcada leva o Prêmio Master. O admin mostra o líder atual no topo. A contagem regressiva "Campeão em HH:MM:SS" aparece na tela de atração e no ranking quando a hora está definida (admin > Configurações).

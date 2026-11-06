@@ -4,6 +4,7 @@ import { addBackground, BubbleField, T, drawCard } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { updatePlay } from '../core/Storage.js';
+import { SHOW_VIRAL_AFTER_GAME } from '../config/game.js';
 
 const MAX_LEN = 40;
 const LGPD = 'Aceito que a Quimia guarde meu contato para falar sobre o brinde (LGPD). Posso pedir a exclusão.';
@@ -142,7 +143,9 @@ export default class Contact extends BaseScene {
   }
 
   done() {
-    this.scene.start('Viral', { next: this.next });
+    // "Salvar" e "Agora não" voltam direto ao Hub (o convite só entra se SHOW_VIRAL_AFTER_GAME for true)
+    if (SHOW_VIRAL_AFTER_GAME) this.scene.start('Viral', { next: this.next });
+    else this.scene.start(this.next.scene, this.next.data);
   }
 
   vertical(dir) {

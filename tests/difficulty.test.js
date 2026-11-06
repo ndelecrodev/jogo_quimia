@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BUBBLE_LEVELS, MIX_LEVELS, SOBE_LEVELS, SOBE_APEX, RUNNER_LEVELS, RUNNER_APEX, RUNNER_OBSTACLES, RUNNER_CLUSTER_SPAN, runnerParams, levelFor, pressureBonus, bubbleParams, mixParams, sobeParams } from '../src/config/difficulty.js';
+import { BUBBLE_LEVELS, MIX_LEVELS, SOBE_LEVELS, SOBE_APEX, RUNNER_LEVELS, RUNNER_APEX, RUNNER_OBSTACLES, RUNNER_CLUSTER_SPAN, runnerParams, levelFor, pressureBonus, bubbleParams, mixParams, sobeParams, PONTOS_POR_NIVEL, SCORE_SCALE, PARS, scaleScore, MIX_COMBO_MAX } from '../src/config/difficulty.js';
 import { MAX_TIME_MS } from '../src/config/game.js';
 
 describe('nível por pontos', () => {
@@ -75,13 +75,28 @@ describe('Pode Misturar?: tempo para decidir', () => {
   });
 });
 
-describe('limites para o público geral (rodada de QA)', () => {
-  it('Kemi Bolha: velocidade até 380 e vão mínimo 240; Runner: velocidade até 800', () => {
-    expect(Math.max(...BUBBLE_LEVELS.map((l) => l.speed))).toBeLessThanOrEqual(380);
-    expect(Math.min(...BUBBLE_LEVELS.map((l) => l.gap))).toBeGreaterThanOrEqual(240);
+describe('limites do jogo (ajustes finais)', () => {
+  it('Kemi Bolha: vão de 300 a 224 (nunca abaixo, a física não deixa), velocidade até 430, nível a cada 4 pontos; Runner: até 800', () => {
+    expect(BUBBLE_LEVELS[0].gap).toBe(300);
+    expect(Math.max(...BUBBLE_LEVELS.map((l) => l.speed))).toBe(430);
+    expect(Math.min(...BUBBLE_LEVELS.map((l) => l.gap))).toBeGreaterThanOrEqual(224);
+    expect(Math.max(...BUBBLE_LEVELS.map((l) => l.maxDelta))).toBeLessThanOrEqual(260);
     expect(Math.max(...RUNNER_LEVELS.map((l) => l.speed))).toBeLessThanOrEqual(800);
-    expect(bubbleParams(5, 0).level).toBe(0);
-    expect(bubbleParams(6, 0).level).toBe(1); // nível a cada 6 pontos
+    expect(PONTOS_POR_NIVEL.bolha).toBe(4);
+    expect(bubbleParams(3, 0).level).toBe(0);
+    expect(bubbleParams(4, 0).level).toBe(1);
+  });
+});
+
+describe('escala de pontos comum', () => {
+  it('toda pontuação mostrada passa pelo SCORE_SCALE e os PARS são iguais', () => {
+    for (const g of ['bolha', 'misturar', 'sobe', 'runner']) {
+      expect(SCORE_SCALE[g]).toBeGreaterThan(0);
+      expect(scaleScore(g, 10)).toBe(Math.round(10 * SCORE_SCALE[g]));
+      expect(PARS[g]).toBe(PARS.bolha);
+    }
+    expect(scaleScore('bolha', 0)).toBe(0);
+    expect(MIX_COMBO_MAX).toBeLessThanOrEqual(4);
   });
 });
 

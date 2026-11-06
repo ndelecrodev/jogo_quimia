@@ -6,7 +6,7 @@ import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
 import { getSettings } from '../core/Storage.js';
 import { LIVES, W, H } from '../config/game.js';
-import { runnerParams, RUNNER_PHYSICS, RUNNER_OBSTACLES, RUNNER_CLUSTER_SPAN, RUNNER_LEVELS } from '../config/difficulty.js';
+import { runnerParams, scaleScore, RUNNER_PT_DIST, RUNNER_PT_BOLHA, RUNNER_PT_OBSTACULO, RUNNER_PHYSICS, RUNNER_OBSTACLES, RUNNER_CLUSTER_SPAN, RUNNER_LEVELS } from '../config/difficulty.js';
 
 const GROUND = 900; // topo da prateleira
 const KX = 420; // posição horizontal da Kemi
@@ -48,6 +48,7 @@ export default class RunnerGame extends BaseScene {
     this.points = 0;
     this.dist = 0;
     this.bubblesGot = 0;
+    this.passedPts = 0;
     this.lives = LIVES;
     this.actions = 0; // pulos e agachadas do jogador (o 1º pulo é o que inicia a corrida)
     this.elapsed = 0;
@@ -172,8 +173,8 @@ export default class RunnerGame extends BaseScene {
 
   addPoints(n, x, y, color) {
     this.points += n;
-    this.scoreText.setText(String(this.points));
-    if (x !== undefined) floatText(this, x, y, `+${n}`, color);
+    this.scoreText.setText(String(scaleScore('runner', this.points)));
+    if (x !== undefined) floatText(this, x, y, `+${scaleScore('runner', n)}`, color);
   }
 
   hit() {
@@ -195,7 +196,7 @@ export default class RunnerGame extends BaseScene {
     burst(this, KX, this.feet - 60, 24);
     this.kemi.setVisible(false);
     this.time.delayedCall(900, () =>
-      this.scene.start('GameOver', { game: 'runner', points: this.points, durationMs: Math.round(this.elapsed), reason, acted: this.actions >= 2 })
+      this.scene.start('GameOver', { game: 'runner', points: scaleScore('runner', this.points), durationMs: Math.round(this.elapsed), reason, acted: this.actions >= 2 })
     );
   }
 
@@ -304,6 +305,7 @@ export default class RunnerGame extends BaseScene {
         const oT = o.y - o.h + 8;
         const oB = o.y - 4;
         if (KX + HALF_W > oL && KX - HALF_W < oR && this.feet - 6 > oT && kTop < oB) {
+          o.hitSeen = true;
           this.hit();
           if (this.ended) return;
           break;
@@ -329,7 +331,7 @@ export default class RunnerGame extends BaseScene {
         sfx.play('bonus');
         this.kemi.setTexture(kemiKey(this, 'happy'));
         this.time.delayedCall(450, () => !this.ended && this.kemi.setTexture(kemiKey(this)));
-        this.addPoints(25, pk.x, pk.y - 40, COLORS.cyanLight);
+        this.addPoints(RUNNER_PT_BOLHA, pk.x, pk.y - 40, COLORS.cyanLight);
         burst(this, pk.x, pk.y, 8);
       }
     }
@@ -342,10 +344,17 @@ export default class RunnerGame extends BaseScene {
     });
 
     // Pontos por distância
-    const dpts = Math.floor(this.dist / 40) + this.bubblesGot * 25;
+    // Obstáculo superado (passou pela Kemi sem bater) vale pontos; a distância pesa pouco
+    for (const o of this.obstacles) {
+      if (!o.passed && o.x + o.w / 2 < KX - HALF_W) {
+        o.passed = true;
+        if (!o.hitSeen) this.passedPts += RUNNER_PT_OBSTACULO;
+      }
+    }
+    const dpts = Math.floor(this.dist / RUNNER_PT_DIST) + this.bubblesGot * RUNNER_PT_BOLHA + this.passedPts;
     if (dpts !== this.points) {
       this.points = dpts;
-      this.scoreText.setText(String(dpts));
+      this.scoreText.setText(String(scaleScore('runner', dpts)));
     }
 
     this.kemi.alpha = inv ? (this.fxReduced ? 0.55 : Math.floor(this.elapsed / 100) % 2 ? 0.3 : 1) : 1;

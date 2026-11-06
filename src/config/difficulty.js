@@ -2,22 +2,37 @@
 import { MAX_TIME_MS } from './game.js';
 
 // Quantos pontos para subir 1 nível, por jogo.
-export const PONTOS_POR_NIVEL = { bolha: 6, sobe: 200, runner: 160 }; // (Pode Misturar? sobe por acertos: ver MIX_* abaixo)
+// Atenção: aqui contam os pontos BRUTOS do jogo (ritmo da dificuldade). O que a pessoa vê/ranqueia é o brutos x SCORE_SCALE.
+export const PONTOS_POR_NIVEL = { bolha: 4, sobe: 100, runner: 130 }; // (Pode Misturar? sobe por acertos: ver MIX_* abaixo)
+
+// Escala comum: pontuação exibida = round(ponto bruto x SCORE_SCALE[jogo]). Calibrada com bots (ver CALIBRACAO.md); recalibre no admin.
+export const SCORE_SCALE = { bolha: 15, misturar: 6, sobe: 2.7, runner: 0.62 };
+// Fontes de pontos brutos por habilidade (não por tempo parado)
+export const MIX_COMBO_MAX = 3; // combo máximo x3
+export const SOBE_PT_ALTURA = 20; // 1 ponto bruto a cada 20 px de altura (antes 10)
+export const SOBE_PT_POWERUP = 25; // bônus por power-up pego
+export const RUNNER_PT_DIST = 120; // 1 ponto bruto a cada 120 px de distância (antes 40)
+export const RUNNER_PT_BOLHA = 25; // por bolhinha
+export const RUNNER_PT_OBSTACULO = 10; // por obstáculo superado
+export const scaleScore = (game, raw) => Math.round((raw || 0) * (SCORE_SCALE[game] ?? 1));
 
 // "par" de cada jogo: pontuação Quimia = round(pontos / par * 1000). (calibrar no admin com partidas reais)
-export const PARS = { bolha: 30, misturar: 40, sobe: 1200, runner: 1000 };
+// Com a escala comum, o par é o mesmo para todos os jogos (Pontuação Quimia comparável).
+export const PARS = { bolha: 300, misturar: 300, sobe: 300, runner: 300 };
 
-// Kemi Bolha — um item por nível (o último se repete). 1080p: vão de 300 a 240 px, velocidade de 250 a 380 px/s.
-// Nível a cada 6 pontos. (Rodada de QA: antes chegava a 450 px/s e vão 210; era demais para o público geral.)
+// Kemi Bolha — um item por nível (o último se repete). 1080p: vão de 300 a 224 px (passos de ~12), velocidade de 250 a 430 px/s.
+// Nível a cada 4 pontos brutos. O pedido era chegar a 200 px, mas a física não deixa: o pulo sobe ~108 px, então o "ar livre" de
+// um vão de 200 (raio de acerto ~52) é 96 px, menor que a oscilação mínima de um pulo; um bot quase perfeito já perdia as 3 vidas em ~47 s
+// e com 216 em ~51 s. Com 224 px um bot quase perfeito chega ao teto de 120 s na maioria das vezes (jogo difícil, mas possível).
 export const BUBBLE_LEVELS = [
   { gap: 300, speed: 250, maxDelta: 120, spacing: 580 },
-  { gap: 288, speed: 270, maxDelta: 140, spacing: 575 },
-  { gap: 276, speed: 290, maxDelta: 160, spacing: 570 },
-  { gap: 266, speed: 310, maxDelta: 175, spacing: 565 },
-  { gap: 256, speed: 330, maxDelta: 190, spacing: 560 },
-  { gap: 248, speed: 350, maxDelta: 200, spacing: 555 },
-  { gap: 242, speed: 365, maxDelta: 210, spacing: 550 },
-  { gap: 240, speed: 380, maxDelta: 220, spacing: 550 },
+  { gap: 288, speed: 275, maxDelta: 150, spacing: 570 },
+  { gap: 276, speed: 300, maxDelta: 175, spacing: 560 },
+  { gap: 264, speed: 325, maxDelta: 200, spacing: 550 },
+  { gap: 252, speed: 350, maxDelta: 220, spacing: 540 },
+  { gap: 240, speed: 375, maxDelta: 240, spacing: 535 },
+  { gap: 232, speed: 400, maxDelta: 250, spacing: 525 },
+  { gap: 224, speed: 430, maxDelta: 260, spacing: 520 },
 ];
 
 // Pode Misturar? — tempo para decidir (3,0 s → 1,8 s) e quantos pares da lista já entraram.

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { BaseScene } from './BaseScene.js';
-import { COLORS } from '../theme.js';
+import { COLORS, hex } from '../theme.js';
 import { addBackground, BubbleField, T, drawCard, kemiKey, fitImage } from '../ui.js';
 import { input } from '../core/InputManager.js';
 import { sfx } from '../core/Sfx.js';
@@ -8,9 +8,10 @@ import { addPlay, getPlays, getSettings } from '../core/Storage.js';
 import { gameRanking, generalRanking } from '../core/RankingSource.js';
 import { quimiaScore, positionOfNick, officialAttempts, generateCode, dayKey, minRank } from '../core/Ranking.js';
 import { gameById } from '../config/games.js';
+import { SHOW_VIRAL_AFTER_GAME } from '../config/game.js';
 import { FATOS } from '../config/fatos.js';
 
-// Fim de partida: pontos, posições, código de resgate, brinde e "Você sabia?".
+// Fim de partida: pontos, posições, brinde (SEM código na tela: o código fica gravado e visível só no admin) e "Você sabia?".
 export default class GameOver extends BaseScene {
   constructor() {
     super('GameOver');
@@ -18,6 +19,8 @@ export default class GameOver extends BaseScene {
 
   create(data) {
     this.begin();
+    this.skipExit = false; // a cena é reaproveitada: zera a marca da partida abandonada anterior
+    this.eligible = false;
     const { game, points, durationMs, reason, acted } = data;
     this.gameId = game;
     const g = gameById(game);
@@ -99,32 +102,33 @@ export default class GameOver extends BaseScene {
     if (official && !rankable) {
       T(this, 520, 505, 'Quase lá!', 'h2', { color: COLORS.cyanLight });
       T(this, 520, 580, `Para entrar no ranking: ${minR} pontos ou mais.`, 'body', { color: COLORS.white });
-      T(this, 520, 630, 'Você ganhou o brinde de participação. Jogue de novo!', 'body', { color: COLORS.mint2 });
+      T(this, 520, 630, 'Você ganhou o brinde de participação!', 'body', { color: COLORS.mint2 });
     } else if (official) {
       T(this, 520, 490, `Pontuação Quimia: ${quimia}`, 'h3', { color: COLORS.neon });
       T(this, 520, 565, `#${posGame} no ${g.name}`, 'h3', { color: COLORS.white });
       T(this, 520, 625, `#${posGen} no Ranking Geral`, 'h3', { color: COLORS.mint2 });
     } else {
       T(this, 520, 520, 'Partida de treino', 'h2', { color: COLORS.cyan });
-      T(this, 520, 595, 'Você já usou as tentativas oficiais.', 'body', { color: COLORS.white });
+      T(this, 520, 595, 'Você já fez a sua jogada oficial.', 'body', { color: COLORS.white });
       T(this, 520, 635, 'Essa partida não vale ranking nem brinde.', 'body', { color: COLORS.white });
     }
 
-    // Card direito: código e brinde
+    // Card direito: SÓ o brinde (o maior que ganhou) e o apelido bem grande, para a equipe conferir a olho.
     const right = this.add.graphics();
     drawCard(right, 1000, 190, 800, 500, { stroke: official ? COLORS.neon : COLORS.elevated2, sw: official ? 5 : 3 });
     if (official) {
-      T(this, 1400, 250, 'CÓDIGO DE RESGATE', 'overline', { color: COLORS.sky2 });
-      const codeText = T(this, 1400, 360, code, 'display', { color: COLORS.neon, fontSize: '150px' });
-      this.tweens.add({ targets: codeText, scale: 1.06, duration: 600, yoyo: true, repeat: 2 });
-      T(this, 1400, 470, 'Mostre este código para a equipe.', 'body', { color: COLORS.white });
-      const names = prizes.map((p) => settings.prizes[p]);
-      names.forEach((n, i) => T(this, 1400, 540 + i * 56, `Brinde: ${n}`, 'h3', { color: i === 0 ? COLORS.mint2 : COLORS.cyanLight }));
-      if (posGen === 1) T(this, 1400, 650, `1º no Geral: concorrendo ao ${settings.prizes.master}`, 'bodyS', { color: COLORS.neon });
-      else if (!prizes.includes('meta')) T(this, 1400, 650, `Meta do brinde extra: ${settings.minScores[game]} pontos`, 'caption', { color: COLORS.sky2 });
+      const premio = prizes.includes('meta') ? settings.prizes.meta : settings.prizes.participacao; // só o maior nível
+      this.prizeIcon(1400, 270);
+      T(this, 1400, 355, 'SEU BRINDE', 'overline', { color: COLORS.sky2 });
+      T(this, 1400, 415, premio, 'h1', { color: COLORS.mint2, wordWrap: { width: 720 }, align: 'center' });
+      const sizeNick = nick.length > 10 ? '84px' : nick.length > 7 ? '104px' : '124px';
+      const nickText = T(this, 1400, 520, nick, 'display', { color: COLORS.neon, fontSize: sizeNick });
+      this.tweens.add({ targets: nickText, scale: 1.05, duration: 600, yoyo: true, repeat: 2 });
+      T(this, 1400, 612, 'Fale com a equipe no stand', 'bodyL', { color: COLORS.white });
+      if (posGen === 1) T(this, 1400, 662, `Você está concorrendo ao ${settings.prizes.master}`, 'bodyS', { color: COLORS.neon });
     } else {
-      T(this, 1400, 440, 'Sem código desta vez.', 'h2', { color: COLORS.white });
-      T(this, 1400, 520, 'Chame um amigo para jogar!', 'body', { color: COLORS.mint2 });
+      T(this, 1400, 420, 'Sem brinde desta vez.', 'h2', { color: COLORS.white });
+      T(this, 1400, 500, 'Chame o próximo jogador!', 'body', { color: COLORS.mint2 });
     }
 
     // Aprendizado (Pode Misturar?): até 3 pares errados, com a resposta certa e o porquê.
@@ -148,17 +152,31 @@ export default class GameOver extends BaseScene {
     }
     T(this, 960, 925, 'Quer saber mais? Pergunte pra Kemi no app Quimia (em breve).', 'caption', { color: COLORS.sky2 });
 
-    // Botões
-    this.btns = [
-      { label: 'JOGAR DE NOVO', do: () => this.leave(g.scene, { gameId: game }) },
-      { label: solo ? 'SAIR' : 'OUTRO JOGO', do: () => this.leave(home) },
-    ].map((b, i) => {
+    // Um único botão: Continuar (→ contato, se elegível → Hub). Sem "Jogar de novo": cada pessoa joga uma vez.
+    this.btns = [{ label: 'CONTINUAR', do: () => this.leave(home) }].map((b) => {
       const gfx = this.add.graphics();
-      const t = T(this, 640 + i * 640, 990, b.label, 'buttonL');
-      return { ...b, gfx, t, x: 640 + i * 640 };
+      const t = T(this, 960, 990, b.label, 'buttonL');
+      return { ...b, gfx, t, x: 960 };
     });
     this.sel = 0;
     this.refresh();
+  }
+
+  /** Ícone do brinde: bolha com estrela. */
+  prizeIcon(x, y) {
+    const bolha = this.add.image(x, y, 'pickup').setScale(2.3).setDepth(6);
+    const star = this.add.graphics().setDepth(7);
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const r = i % 2 ? 22 : 48;
+      const a = -Math.PI / 2 + (i * Math.PI) / 5;
+      pts.push({ x: x + Math.cos(a) * r, y: y + 4 + Math.sin(a) * r });
+    }
+    star.fillStyle(hex(COLORS.neon), 1);
+    star.fillPoints(pts, true);
+    star.lineStyle(5, hex(COLORS.bg), 1);
+    star.strokePoints(pts, true);
+    this.tweens.add({ targets: bolha, scale: 2.45, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   /** Tela para partida abandonada: sem código, sem brinde, não gastou tentativa. */
@@ -182,12 +200,13 @@ export default class GameOver extends BaseScene {
     this.refresh();
   }
 
-  /** Saída da tela final: contato (se elegível) → convite com 2 QR → destino. */
+  /** Saída da tela final: contato (se elegível) → Hub. A tela de convite (Viral) só entra se SHOW_VIRAL_AFTER_GAME for true. */
   leave(scene, data) {
     const next = { scene, data };
-    if (this.skipExit) return this.scene.start(scene, data); // abandonada: direto, sem contato nem convite
+    if (this.skipExit) return this.scene.start(scene, data); // abandonada: direto
     if (this.eligible && !this.play.contact) this.scene.start('Contact', { playId: this.play.id, next });
-    else this.scene.start('Viral', { next });
+    else if (SHOW_VIRAL_AFTER_GAME) this.scene.start('Viral', { next });
+    else this.scene.start(scene, data);
   }
 
   refresh() {
@@ -207,7 +226,7 @@ export default class GameOver extends BaseScene {
     this.bubbles.update(delta);
     if (!this.ready(600)) return;
     if (input.pressed('left') && this.sel > 0) { this.sel--; sfx.play('nav'); this.refresh(); }
-    if (input.pressed('right') && this.sel < 1) { this.sel++; sfx.play('nav'); this.refresh(); }
+    if (input.pressed('right') && this.sel < this.btns.length - 1) { this.sel++; sfx.play('nav'); this.refresh(); }
     if (input.pressed('action')) { sfx.play('ok'); this.btns[this.sel].do(); }
     if (input.pressed('back')) { sfx.play('back'); this.leave(this.registry.get('solo') ? 'Attract' : 'Hub'); }
   }
